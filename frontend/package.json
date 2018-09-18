@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@types/history": "^4.7.0",
+    "@types/react-redux": "^6.0.9",
     "@types/webpack": "^4.4.11",
     "@types/webpack-env": "^1.13.6",
     "axios": "^0.18.0",
