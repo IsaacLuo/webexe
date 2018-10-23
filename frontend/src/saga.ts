@@ -20,8 +20,25 @@ export function* waitAndSaySomething() {
   }
 }
 
+export function* testWS(action) {
+  const ws = new WebSocket('ws://localhost:8000/api/mergeLightCycler?token=1234');
+
+  ws.onopen = () =>{
+    console.log('ws onopen');
+  };
+
+  ws.onmessage = event => {
+    console.log('server ws: '+ event.data);
+    const res = JSON.parse(event.data);
+    if(res.prompt) {
+      ws.send(JSON.stringify(action.data))
+    }
+  }
+}
+
 export function* watchMyMessage() {
   yield takeLatest(WAIT_AND_SAY_SOMETHING, waitAndSaySomething);
+  yield takeLatest('testWS', testWS);
 }
 
 export default function* rootSaga() {

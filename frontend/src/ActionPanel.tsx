@@ -5,7 +5,11 @@ import { IStoreState } from './store';
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
-import { ActionSaySomething, ActionClearMessage, ActionWaitAndSaySomething } from './actions';
+import { 
+  ActionSaySomething, 
+  ActionClearMessage, 
+  ActionWaitAndSaySomething,
+ } from './actions';
 
 // other tools
 import styled from 'styled-components'
@@ -14,6 +18,7 @@ interface IProps {
   dispatchSayHelloWorld: () => void,
   dispatchClearMessage: () => void,
   dispatchAsyncSayHelloWorld: () => void,
+  dispatchTestWS: ()=>void,
 }
 interface IState {
   
@@ -33,7 +38,8 @@ class ActionPanel extends React.Component<IProps, IState> {
     const {
       dispatchSayHelloWorld,
       dispatchClearMessage,
-      dispatchAsyncSayHelloWorld
+      dispatchAsyncSayHelloWorld,
+      dispatchTestWS,
     } = this.props;
 
     return (
@@ -41,6 +47,7 @@ class ActionPanel extends React.Component<IProps, IState> {
         <button onClick = {dispatchSayHelloWorld}>say hello</button>
         <button onClick = {dispatchAsyncSayHelloWorld}>say hello after 1 second</button>
         <button onClick = {dispatchClearMessage}>clear</button>
+        <button onClick = {dispatchTestWS}>test ws</button>
       </MyPanel>
     );
   }
@@ -53,6 +60,7 @@ const mapDispatchToProps = (dispatch :Dispatch) => ({
   dispatchSayHelloWorld: () => dispatch(ActionSaySomething('hello world')),
   dispatchClearMessage: () => dispatch(ActionClearMessage()),
   dispatchAsyncSayHelloWorld: () => dispatch(ActionWaitAndSaySomething('hello world', 1000)),
+  dispatchTestWS: () => dispatch({type:'testWS', data:{msg:'hello'}}),
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ActionPanel))
