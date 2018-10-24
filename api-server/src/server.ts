@@ -14,6 +14,13 @@ const conf = process.env.NODE_ENV === 'production' ?
   require('../config.dev.json')
 
 const tempPath = path.resolve(conf.tempPath);
+if (!fs.existsSync(tempPath)) {
+  fs.mkdir(tempPath, { recursive: true }, (err) => {
+    console.log('created folder '+tempPath);
+  });
+}
+
+
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -21,7 +28,8 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     console.log(file)
-    cb(null, `${Date.now()}-${Math.random().toString(36).substring(2)}` )
+    file.originalname.split('.')
+    cb(null, `${Date.now()}-${Math.random().toString(36).substring(2)}.${file.originalname}` )
   }
 })
 const uploadToDisk = multer({ storage: storage })
@@ -93,7 +101,7 @@ function verifyToken(ws, req, next) {
 /**
  * upload files to the server, 
  */
-app.post('/api/file', userMustLoggedIn,  uploadToDisk.single('file'),  (req :Request, res: Response, next: NextFunction) => {
+app.post('/api/tempFile', userMustLoggedIn,  uploadToDisk.single('file'),  (req :Request, res: Response, next: NextFunction) => {
   res.json({id:req.file.filename,size: req.file.size, filename:req.file.originalname});
   next();
 }, () => {
@@ -120,19 +128,36 @@ app.post('/api/file', userMustLoggedIn,  uploadToDisk.single('file'),  (req :Req
   });
 });
 
+/**
+ * upload files to the server, 
+ */
+app.get('/api/tempFile/:id', (req :Request, res: Response, next: NextFunction) => {
+  if (/\//.test(req.params.id)) {
+    res.status(404).json({message: 'unable to find the file'})
+  }
+  res.sendFile(path.join(tempPath, req.params.id));
+});
+
 app.ws('/api/mergeLightCycler', verifyToken, function(ws, req) {
   ws.on('message', raw => {
     const msg = JSON.parse(raw);
     ws.json({finish:false, message:'accepted', ref: msg});
-    
     const process = childProcess.spawn('python', ['./scripts/merge_light_cycler.py']);
+    
     process.stdout.on('data', (data) => {
       console.log(`stdout: ${data}`);
-      ws.json({finish:false, message:`${data}`})
+      try {
+        const output = JSON.parse(`${data}`)
+        ws.json({finish:false, ...output})
+      } catch {
+        ws.json({finish:false, message:`${data}`})
+      }
+      
     });
-  
+
     process.stderr.on('data', (data) => {
       console.log(`stderr: ${data}`);
+      ws.json({pipe:'stderr', message:`${data}`})
     });
   
     process.on('close', (code) => {
@@ -140,6 +165,9 @@ app.ws('/api/mergeLightCycler', verifyToken, function(ws, req) {
       ws.json({finish:true, code});
       ws.close();
     });
+
+    process.stdin.write(raw);
+    process.stdin.write('\n');
   });
 });
 
