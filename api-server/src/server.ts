@@ -5,13 +5,30 @@ import * as bodyParser from 'body-parser'
 import multer from 'multer'
 import * as childProcess from 'child_process'
 import expressWs from 'express-ws'
+import fs from 'fs'
+import path from 'path'
 
+console.log(process.env.NODE_ENV)
+const conf = process.env.NODE_ENV === 'production' ? 
+  require('../config.dev.json') :
+  require('../config.dev.json')
 
+const tempPath = path.resolve(conf.tempPath);
 
-var upload = multer();
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, tempPath)
+  },
+  filename: (req, file, cb) => {
+    console.log(file)
+    cb(null, `${Date.now()}-${Math.random().toString(36).substring(2)}` )
+  }
+})
+const uploadToDisk = multer({ storage: storage })
 
 interface Request extends express.Request {
   isLoggedIn: boolean,
+  file: any,
   files: any[],
 }
 
@@ -72,6 +89,36 @@ function verifyToken(ws, req, next) {
     ws.close();
   }
 }
+
+/**
+ * upload files to the server, 
+ */
+app.post('/api/file', userMustLoggedIn,  uploadToDisk.single('file'),  (req :Request, res: Response, next: NextFunction) => {
+  res.json({id:req.file.filename,size: req.file.size, filename:req.file.originalname});
+  next();
+}, () => {
+  // remove files older than 1 hour
+  console.debug('remove old files ', tempPath)
+  fs.readdir(tempPath, (err, files) => {
+    files.forEach((file, index) => {
+      const filePath = path.join(tempPath, file);
+      fs.stat(filePath, (err, stat) => {
+        var endTime, now;
+        if (err) {
+          console.debug(err);
+          return err;
+        }
+        now = new Date().getTime();
+        endTime = new Date(stat.ctime).getTime() + 3600000;
+        if (now > endTime) {
+          fs.unlink(filePath, err=>{
+            console.debug(`remove file ${filePath}`);
+          })
+        }
+      });
+    });
+  });
+});
 
 app.ws('/api/mergeLightCycler', verifyToken, function(ws, req) {
   ws.on('message', raw => {

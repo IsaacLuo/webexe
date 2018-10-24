@@ -13,8 +13,8 @@ import './App.css';
 import styled from 'styled-components'
 
 // components
-import ActionPanel from './ActionPanel';
-
+import ActionPanel from './ActionPanel'
+import MergeLightCyclerReport from './MergeLightCyclerReport'
 
 interface IProps {
   message: string,  
@@ -42,6 +42,7 @@ class App extends React.Component<IProps, IState> {
       <div className="App">
         <MyPanel>
           <Route path='/' exact={true} component={ActionPanel} />
+          <Route path='/tools/MergeLightCyclerReport' exact={true} component={MergeLightCyclerReport} />
           <div>{message}</div>
         </MyPanel>
       </div>
