@@ -23,7 +23,7 @@ def read_plate_definition(filename):
     cols = sheet.max_column - 1
     plate_type = rows*cols
     if plate_type != 96 and plate_type != 384:
-        raise RuntimeError('plate type neither 96 nor 384')
+        raise RuntimeError('plate type neither 96 nor 384, it has {} rows and {} cols'.format(rows, cols))
 
     content = []
     for i in range(rows):

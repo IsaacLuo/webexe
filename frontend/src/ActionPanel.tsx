@@ -24,9 +24,9 @@ interface IState {
   
 }
 
-const MyPanel = styled.div`
-  background: #aaa;
-`;
+// const MyPanel = styled.div`
+//   background: #aaa;
+// `;
 
 class ActionPanel extends React.Component<IProps, IState> {
   constructor(props: IProps) {
@@ -43,12 +43,12 @@ class ActionPanel extends React.Component<IProps, IState> {
     } = this.props;
 
     return (
-      <MyPanel>
+      <div>
         <button onClick = {dispatchSayHelloWorld}>say hello</button>
         <button onClick = {dispatchAsyncSayHelloWorld}>say hello after 1 second</button>
         <button onClick = {dispatchClearMessage}>clear</button>
         <button onClick = {dispatchTestWS}>test ws</button>
-      </MyPanel>
+      </div>
     );
   }
 }

@@ -7,6 +7,7 @@ import * as childProcess from 'child_process'
 import expressWs from 'express-ws'
 import fs from 'fs'
 import path from 'path'
+import {runPython} from './runPython'
 
 console.log(process.env.NODE_ENV)
 const conf = process.env.NODE_ENV === 'production' ? 
@@ -101,7 +102,7 @@ function verifyToken(ws, req, next) {
 /**
  * upload files to the server, 
  */
-app.post('/api/tempFile', userMustLoggedIn,  uploadToDisk.single('file'),  (req :Request, res: Response, next: NextFunction) => {
+app.post('/api/tempFile/', userMustLoggedIn,  uploadToDisk.single('file'),  (req :Request, res: Response, next: NextFunction) => {
   res.json({id:req.file.filename,size: req.file.size, filename:req.file.originalname});
   next();
 }, () => {
@@ -131,7 +132,10 @@ app.post('/api/tempFile', userMustLoggedIn,  uploadToDisk.single('file'),  (req 
 /**
  * upload files to the server, 
  */
-app.get('/api/tempFile/:id', (req :Request, res: Response, next: NextFunction) => {
+app.get([
+  '/api/tempFile/:id',
+  '/api/tempFile/:id/as/:filename'
+  ], (req :Request, res: Response, next: NextFunction) => {
   if (/\//.test(req.params.id)) {
     res.status(404).json({message: 'unable to find the file'})
   }
@@ -142,32 +146,18 @@ app.ws('/api/mergeLightCycler', verifyToken, function(ws, req) {
   ws.on('message', raw => {
     const msg = JSON.parse(raw);
     ws.json({finish:false, message:'accepted', ref: msg});
-    const process = childProcess.spawn('python', ['./scripts/merge_light_cycler.py']);
-    
-    process.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-      try {
-        const output = JSON.parse(`${data}`)
-        ws.json({finish:false, ...output})
-      } catch {
-        ws.json({finish:false, message:`${data}`})
-      }
-      
+
+    // run python now
+    runPython('./scripts/merge_light_cycler.py',
+    raw+'\n',
+    obj => {
+      console.log(obj);
+      ws.json(obj);
+    }, errMsg => {
+      console.log(errMsg);
+      ws.json({message: errMsg});
     });
 
-    process.stderr.on('data', (data) => {
-      console.log(`stderr: ${data}`);
-      ws.json({pipe:'stderr', message:`${data}`})
-    });
-  
-    process.on('close', (code) => {
-      console.log(`child process exited with code ${code}`);
-      ws.json({finish:true, code});
-      ws.close();
-    });
-
-    process.stdin.write(raw);
-    process.stdin.write('\n');
   });
 });
 
