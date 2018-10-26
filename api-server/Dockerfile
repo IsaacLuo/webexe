@@ -1,15 +1,17 @@
-FROM node:10
-# install python
-RUN apt-get update \
-    && apt-get install -y python3-pip python3-dev \
-    && cd /usr/local/bin \
-    && ln -s /usr/bin/python3 python \
-    && pip3 install --upgrade pip
+FROM codingpeon/node10python37:latest
 
 WORKDIR /app
+
+RUN pip3 install pipenv 
+
 ADD ./package.json .
 RUN yarn install
 ADD . .
 RUN yarn build
+
+WORKDIR /app/scripts
+RUN pipenv install --system --deploy --ignore-pipfile
+
+WORKDIR /app
 CMD ["yarn", "run production"]
 
