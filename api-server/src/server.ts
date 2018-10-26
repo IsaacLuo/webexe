@@ -142,7 +142,7 @@ app.get([
   res.sendFile(path.join(tempPath, req.params.id));
 });
 
-app.ws('/api/mergeLightCycler', verifyToken, function(ws, req) {
+app.ws('/api/ws/mergeLightCycler', verifyToken, function(ws, req) {
   ws.on('message', raw => {
     const msg = JSON.parse(raw);
     ws.json({finish:false, message:'accepted', ref: msg});

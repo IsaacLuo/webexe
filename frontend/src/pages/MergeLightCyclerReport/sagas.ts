@@ -75,7 +75,7 @@ export function* mergeLightCyclerReport(action) {
 
 function initWebSocketMergeLightCycler(plateDefinitionFileRefs:INamedLink[], lightCyclerReportFileRefs:INamedLink[]) {
   return eventChannel( emitter => {
-    const ws = new WebSocket(`${config.pythonServerURL}/api/mergeLightCycler?token=1234`);
+    const ws = new WebSocket(`${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`);
 
     ws.onopen = () =>{
       console.log('ws onopen');
