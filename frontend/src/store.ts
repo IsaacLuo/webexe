@@ -3,19 +3,7 @@ import reducer from './reducer'
 import saga from './saga'
 import createSagaMiddleware from 'redux-saga'
 
-export interface IAppStoreState {
-  message: string,
-}
 
-export interface ITaskStoreState {
-  mergeLightCyclerReports: any[],
-  uploadedFiles: any[],
-}
-
-export interface IStoreState {
-  app: IAppStoreState,
-  tasks: ITaskStoreState,
-}
 
 /* tslint-disable no-underscore-dangle */
 

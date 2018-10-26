@@ -14,7 +14,7 @@ import styled from 'styled-components'
 
 // components
 import ActionPanel from './ActionPanel'
-import MergeLightCyclerReport from './MergeLightCyclerReport'
+import MergeLightCyclerReport from './components/MergeLightCyclerReport'
 
 interface IProps {
   message: string,  

@@ -1,18 +1,3 @@
-import { string } from "prop-types";
-
-export interface IAction {
-  type: string,
-  data: any,
-}
-
-export interface IFileUploadAction extends IAction{
-  type: string,
-  data: {
-    taskId?: string,
-    file: File,
-    [index: string]:any,
-  }
-}
 
 export const SAY_SOMETHING = 'SAY_SOMETHING';
 export function ActionSaySomething (message: string) {
