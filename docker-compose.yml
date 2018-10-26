@@ -12,8 +12,6 @@ services:
 
   frontend:
     build: ./frontend
-    environment:
-      - BACKEND_HOST=api.tools.cailab.org:12800
     ports:
       - "12080:80"
     links:

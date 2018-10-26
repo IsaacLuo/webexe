@@ -2,7 +2,7 @@ let config;
 
 switch(process.env.NODE_ENV) {
     case 'production':
-        const host = process.env.BACKEND_HOST ? process.env.BACKEND_HOST : 'localhost:8000';
+        const host = 'api.tools.cailab.org:12800';
         config = {
             backendURL: `http://${host}`,
             pythonServerURL: `ws://${host}`,
