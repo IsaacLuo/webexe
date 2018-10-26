@@ -13,10 +13,11 @@ import './App.css';
 import styled from 'styled-components'
 
 // components
+import NavBar from './components/NavBar'
+import Dashboard from './pages/Dashboard'
 import MergeLightCyclerReport from './pages/MergeLightCyclerReport'
 
 interface IProps {
-  message: string,  
 }
 
 interface IState {
@@ -36,14 +37,13 @@ class App extends React.Component<IProps, IState> {
   }
 
   public render() {
-    const {message} = this.props;
     return (
       <div className="App">
+        <NavBar/>
         <MyPanel>
-          <Link to='/tools/MergeLightCyclerReport'>'/tools/MergeLightCyclerReport'</Link>
-          <p>{process.env.NODE_ENV}</p>
+          <Route path='/' exact={true} component={Dashboard} />
           <Route path='/tools/MergeLightCyclerReport' exact={true} component={MergeLightCyclerReport} />
-          <div>{message}</div>
+          <p>{process.env.NODE_ENV} version 0.1.0</p>
         </MyPanel>
       </div>
     );

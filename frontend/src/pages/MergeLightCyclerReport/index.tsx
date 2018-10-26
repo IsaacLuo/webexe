@@ -22,7 +22,6 @@ import { ActionUploadedPlateDefinitionFile, UPLOAD_PLATE_DEFINITION_FILE, UPLOAD
 import { start } from 'repl';
 
 const MyPanel = styled.div`
-  background: #eee;
   width:800px;
   display:flex;
   flex-direction: column;
