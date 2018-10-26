@@ -1,4 +1,4 @@
-FROM codingpeon/node10python37:latest
+FROM codingpeon/node-python:latest
 
 WORKDIR /app
 
