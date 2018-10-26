@@ -63,3 +63,6 @@ a {
   color:#20a0ff;
   cursor: pointer;
 }
+.message-bar.error {
+  background-color: #ff7777;
+}

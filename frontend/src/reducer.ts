@@ -1,50 +1,32 @@
 import { combineReducers } from 'redux';
 import mergeLightCyclerReport from './pages/MergeLightCyclerReport/reducers'
+import { IAppStoreState, IAction } from './types';
+import config from './config'
 
-// function myReducer(state :IAppStoreState = {
-//   message: '',
-// }, action: IAction) {
-//   switch (action.type) {
-//     case SAY_SOMETHING:
-//       return {...state, message: action.data};
-
-//     case CLEAR_MESSAGE:
-//       return {...state, message: ''};
-    
-//     case 'addTaskResult':
-//       return state;
-//   }
-//   return state;
-// }
-
-// function taskReducer(state :ITaskStoreState = {
-//   mergeLightCyclerReports:[],
-//   uploadedFiles: [],
-// }, action: IAction) {
-//   switch (action.type) {
-//     case 'addTaskResult':
-//       const newState = {
-//         ...state,
-//       };
-//       if (!newState[action.data.taskId]) {
-//         newState[action.data.taskId] = []
-//       }
-//       const arr = [...newState[action.data.taskId], {link:action.data.link, name: action.data.name}]
-//       newState[action.data.taskId] = arr;
-//       return newState;
-    
-//     case 'NEW_FILE_UPLOADED':
-//       const {id, name} = action.data
-//       return {
-//         ...state,
-//         uploadedFiles: [...state.uploadedFiles,
-//           {id, name}
-//         ]
-//       }
-//   }
-//   return state;
-// }
+function app(state :IAppStoreState = {
+  message: '',
+  messageStyle: 'normal',
+}, action: IAction) {
+  switch (action.type) {
+    case 'SHOW_CONNECTED':
+      return {
+        ...state,
+        message: `connected to ${config.backendURL}`,
+        messageStyle: 'normal',
+      }
+    case 'SHOW_DISCONNECTED':
+      return {
+        ...state,
+        message: `failed to connect ${config.backendURL}, please try again later`,
+        messageStyle: 'error',
+      }
+    default:
+      return state;
+  }
+  return state;
+}
 
 export default combineReducers({
+  app,
   mergeLightCyclerReport,
 });

@@ -2,11 +2,10 @@ let config;
 
 switch(process.env.NODE_ENV) {
     case 'production':
-        const host = process.env.npm_backend_host ? process.env.npm_backend_host : 'localhost';
-        const port = process.env.npm_backend_port ? process.env.npm_backend_port : '8000';
+        const host = process.env.BACKEND_HOST ? process.env.BACKEND_HOST : 'localhost:8000';
         config = {
-            backendURL: `http://${host}:${port}`,
-            pythonServerURL: `ws://${host}:${port}`,
+            backendURL: `http://${host}`,
+            pythonServerURL: `ws://${host}`,
         }
         break;
     default:

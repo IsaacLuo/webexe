@@ -10,16 +10,11 @@ import {
   RESET_MLCR,
 } from './actions';
 
-import config from '../../config'
-
 // other tools
 import styled from 'styled-components'
-
-import {Upload, Button} from 'element-react'
+import {Button} from 'element-react'
 import Dropzone from 'react-dropzone'
-import Axios from 'axios';
-import { ActionUploadedPlateDefinitionFile, UPLOAD_PLATE_DEFINITION_FILE, UPLOAD_LIGHT_CYCLER_REPORT_FILE } from './actions';
-import { start } from 'repl';
+import { UPLOAD_PLATE_DEFINITION_FILE, UPLOAD_LIGHT_CYCLER_REPORT_FILE } from './actions';
 
 const MyPanel = styled.div`
   width:800px;
@@ -34,6 +29,7 @@ const MyDropzone = styled(Dropzone)`
   margin: 20px;
   width: 80%;
   padding: 20px;
+  min-height: 100px;
 `
 
 const FileLink = styled.div`
@@ -60,10 +56,6 @@ class MergeLightCyclerReport extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      // plateDefinitionIds: [],
-      // lightCyclerReportIds: [],
-      // taskId: Math.random().toString(36).substring(2),
-      // taskId: 'MergeLightCyclerReport',
     };
   }
 

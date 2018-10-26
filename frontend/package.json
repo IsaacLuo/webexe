@@ -8,6 +8,7 @@
     "@types/webpack": "^4.4.11",
     "@types/webpack-env": "^1.13.6",
     "axios": "^0.18.0",
+    "cross-env": "^5.2.0",
     "element-react": "^1.4.21",
     "element-theme-default": "^1.4.13",
     "react": "^16.4.2",
@@ -24,7 +25,7 @@
   },
   "scripts": {
     "start": "react-scripts-ts start",
-    "build": "react-scripts-ts build",
+    "build": "cross-env BACKEND_HOST=api.tools.cailab.org:12800 react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject"
   },
@@ -34,9 +35,5 @@
     "@types/react": "^16.4.8",
     "@types/react-dom": "^16.0.7",
     "typescript": "^3.0.1"
-  },
-  "backend": {
-    "host": "vm3.cailab.org",
-    "port": "12800"
   }
 }

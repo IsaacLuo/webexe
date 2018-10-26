@@ -82,8 +82,8 @@ function userMustLoggedIn (req :Request, res :Response, next: NextFunction) {
 }
 
 // ============================API============================================
-app.get('/api/message', userMustLoggedIn, (req :Request, res: Response) => {
-  res.json({message:'hello from server'});
+app.all('/api/test', userMustLoggedIn, (req :Request, res: Response) => {
+  res.json({message:'OK'});
 });
 
 function verifyToken(ws, req, next) {

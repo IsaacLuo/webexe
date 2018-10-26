@@ -13,6 +13,7 @@ export interface IFileUploadAction extends IAction{
 
 export interface IAppStoreState {
   message: string,
+  messageStyle: string,
 }
 
 export interface INamedLink {
