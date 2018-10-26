@@ -54,6 +54,7 @@ class App extends React.Component<IProps, IState> {
           <Route path='/tools/MergeLightCyclerReport' exact={true} component={MergeLightCyclerReport} />
           <p className={`message-bar ${messageStyle}`}>{message}</p>
           <p>{process.env.NODE_ENV} version 0.1.0</p>
+          <p>{JSON.stringify(process.env)} {JSON.stringify(config)}</p>
         </MyPanel>
       </div>
     );
