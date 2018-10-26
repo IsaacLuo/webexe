@@ -165,7 +165,7 @@ app.ws('/api/mergeLightCycler', verifyToken, function(ws, req) {
 app.use('/public', express.static('public'));
 
 // ----------------------------------------------------------------------------
-app.listen(8000, (err) => {
+app.listen(8000, '0.0.0.0', (err) => {
   console.log('api server on 8000');
   if (err) console.log(err);
 })
