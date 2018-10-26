@@ -1,6 +1,6 @@
+import {IStoreState} from './types'
 // react-redux-router
-import * as React from 'react';
-import { IStoreState } from './store'
+import * as React from 'react'
 import { Dispatch } from 'redux'
 import { withRouter, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
@@ -13,8 +13,7 @@ import './App.css';
 import styled from 'styled-components'
 
 // components
-import ActionPanel from './ActionPanel'
-import MergeLightCyclerReport from './components/MergeLightCyclerReport'
+import MergeLightCyclerReport from './pages/MergeLightCyclerReport'
 
 interface IProps {
   message: string,  
@@ -43,7 +42,6 @@ class App extends React.Component<IProps, IState> {
         <MyPanel>
           <Link to='/tools/MergeLightCyclerReport'>'/tools/MergeLightCyclerReport'</Link>
           <p>{process.env.NODE_ENV}</p>
-          <Route path='/' exact={true} component={ActionPanel} />
           <Route path='/tools/MergeLightCyclerReport' exact={true} component={MergeLightCyclerReport} />
           <div>{message}</div>
         </MyPanel>
@@ -54,7 +52,7 @@ class App extends React.Component<IProps, IState> {
 
 
 const mapStateToProps = (state :IStoreState) => ({
-  message: state.app.message,
+  
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({
