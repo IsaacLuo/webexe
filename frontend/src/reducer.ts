@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux';
 import mergeLightCyclerReport from './pages/MergeLightCyclerReport/reducers'
+import testLongTask from './pages/TestLongTask/reducers'
 import { IAppStoreState, IAction } from './types';
 import config from './config'
 
@@ -29,4 +30,5 @@ function app(state :IAppStoreState = {
 export default combineReducers({
   app,
   mergeLightCyclerReport,
+  testLongTask,
 });

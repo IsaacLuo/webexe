@@ -142,6 +142,9 @@ app.get([
   res.sendFile(path.join(tempPath, req.params.id));
 });
 
+/**
+ * run mergeLightCycler python
+ */
 app.ws('/api/ws/mergeLightCycler', verifyToken, function(ws, req) {
   ws.on('message', raw => {
     const msg = JSON.parse(raw);
@@ -155,7 +158,28 @@ app.ws('/api/ws/mergeLightCycler', verifyToken, function(ws, req) {
       ws.json(obj);
     }, errMsg => {
       console.log(errMsg);
-      ws.json({message: errMsg});
+      ws.json({type:'log', message: errMsg});
+    });
+
+  });
+});
+
+/**
+ * run test long task python
+ */
+app.ws('/api/ws/testLongTask', verifyToken, function(ws, req) {
+  ws.on('message', raw => {
+    const msg = JSON.parse(raw);
+    ws.json({finish:false, message:'accepted', ref: msg});
+
+    // run python now
+    runPython('./scripts/test_long_task.py', null,
+    obj => {
+      console.log(obj);
+      ws.json(obj);
+    }, errMsg => {
+      console.log(errMsg);
+      ws.json({type:'log', message: errMsg});
     });
 
   });

@@ -28,7 +28,13 @@ export interface IMergeLightCyclerReportsStoreState {
   mergedResultFileRefs: INamedLink[],
 }
 
+export interface ITestLongTaskStoreState {
+  message: string,
+  progress: 0,
+}
+
 export interface IStoreState {
   app: IAppStoreState,
   mergeLightCyclerReport:IMergeLightCyclerReportsStoreState,
+  testLongTask:ITestLongTaskStoreState,
 }
