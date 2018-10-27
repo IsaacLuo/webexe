@@ -5,7 +5,7 @@ switch(process.env.NODE_ENV) {
         const host = 'api.tools.cailab.org';
         config = {
             backendURL: `https://${host}`,
-            pythonServerURL: `ws://${host}`,
+            pythonServerURL: `wss://${host}`,
         }
         break;
     default:
