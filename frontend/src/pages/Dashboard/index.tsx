@@ -24,6 +24,9 @@ const DashboardItem = styled.div`
   border-radius: 25px;
   padding: 20px;
   margin: 20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 `;
 
 const DashboardItemTitle = styled.div`

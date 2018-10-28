@@ -83,14 +83,13 @@ class MergeLightCyclerReport extends React.Component<IProps, IState> {
 
     return (
       <MyPanel>
-        <p>step 1: upload plate definition files</p>
         <MyDropzone
           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           acceptStyle={{borderColor:'#42d885'}}
           rejectStyle={{borderColor:'#ff4949'}}
           onDropAccepted={this.onDropPlateDefinitionFiles}
         >
-          <div>drop plate definition files here</div>
+          <div>drag & drop plate definition files here, or click to upload</div>
           <div>
             {uploadedPlateDefinitions}
           </div>
@@ -101,7 +100,7 @@ class MergeLightCyclerReport extends React.Component<IProps, IState> {
           rejectStyle={{borderColor:'#ff4949'}}
           onDropAccepted={this.onDropLightCyclerFiles}
         >
-          <div>drop lightcycler reports here</div>
+          <div>drag & drop lightcycler reports here, or click to upload</div>
           <div>
             {uploadedLightCyclerReports}
           </div>
@@ -126,7 +125,12 @@ class MergeLightCyclerReport extends React.Component<IProps, IState> {
             clear
           </Button>
         </div>
-        {results}
+        {results.length > 0 &&
+          <div>
+            <p> results </p>
+            {results}
+          </div>
+        }
       </MyPanel>
     );
   }

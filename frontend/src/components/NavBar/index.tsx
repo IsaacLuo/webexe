@@ -18,12 +18,14 @@ interface IState {
 class NavBar extends React.Component<IProps, IState> {
   public render () {
     return (
-    <Menu theme="dark" defaultActive="1" mode="horizontal">
-      <Link to='/'><Menu.Item index="1">Home</Menu.Item></Link>
-      <Menu.SubMenu index="2" title="tools">
-        <Link to='/tools/MergeLightCyclerReport'><Menu.Item index="2-1">Merge Light Cycler Report</Menu.Item></Link>
-      </Menu.SubMenu>
-    </Menu>
+    <header>
+      <Menu theme="dark" defaultActive="1" mode="horizontal">
+        <Link to='/'><Menu.Item index="1">Home</Menu.Item></Link>
+        <Menu.SubMenu index="2" title="tools">
+          <Link to='/tools/MergeLightCyclerReport'><Menu.Item index="2-1">Merge Light Cycler Report</Menu.Item></Link>
+        </Menu.SubMenu>
+      </Menu>
+    </header>
     )
   }
 
