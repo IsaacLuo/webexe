@@ -17,7 +17,7 @@ export default function handleWebSockets(app) {
         next();
       } else {
         console.log('already running '+ taskName);
-        ws.send(JSON.stringify({type:'abort', message:`another ${taskName} task is running, please try again later`}));
+        ws.send(JSON.stringify({type:'rejected', message:`another ${taskName} task is running, please try again later`}));
         ws.close();
       }
     }

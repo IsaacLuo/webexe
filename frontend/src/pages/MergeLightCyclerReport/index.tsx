@@ -42,6 +42,7 @@ interface IProps {
   plateDefinitionFileRefs: INamedLink[],
   lightCyclerReportFileRefs: INamedLink[],
   mergedResultFileRefs: INamedLink[],
+  ws: WebSocket,
   uploadPlateDefinitionFile: (file:File) => void,
   uploadLightCyclerReportFile: (file:File) => void,
   start: ()=>void,
@@ -89,7 +90,7 @@ class MergeLightCyclerReport extends React.Component<IProps, IState> {
           rejectStyle={{borderColor:'#ff4949'}}
           onDropAccepted={this.onDropPlateDefinitionFiles}
         >
-          <div>drag & drop plate definition files here, or click to upload</div>
+          <div>drag and drop plate definition files here, or click to upload</div>
           <div>
             {uploadedPlateDefinitions}
           </div>
@@ -100,7 +101,7 @@ class MergeLightCyclerReport extends React.Component<IProps, IState> {
           rejectStyle={{borderColor:'#ff4949'}}
           onDropAccepted={this.onDropLightCyclerFiles}
         >
-          <div>drag & drop lightcycler reports here, or click to upload</div>
+          <div>drag and drop lightcycler reports here, or click to upload</div>
           <div>
             {uploadedLightCyclerReports}
           </div>

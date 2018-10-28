@@ -7,6 +7,7 @@
     "@types/react-redux": "^6.0.9",
     "@types/webpack": "^4.4.11",
     "@types/webpack-env": "^1.13.6",
+    "@types/websocket": "^0.0.40",
     "axios": "^0.18.0",
     "cross-env": "^5.2.0",
     "element-react": "^1.4.21",
