@@ -24,6 +24,7 @@ const MyPanel = styled.div`
 interface IProps {
   message: string,
   progress: number,
+  showProgressBar: boolean,
   start: ()=>void,
 }
 interface IState {
@@ -43,6 +44,7 @@ class TestLongTask extends React.Component<IProps, IState> {
       message,
       start,
       progress,
+      showProgressBar,
     } = this.props;
     return (
       <MyPanel>
@@ -57,6 +59,7 @@ class TestLongTask extends React.Component<IProps, IState> {
         </div>
         <ProgressMonitorPanel
           progress={progress}
+          showProgressBar={showProgressBar}
           message={message}
         />
       </MyPanel>
@@ -67,6 +70,7 @@ class TestLongTask extends React.Component<IProps, IState> {
 const mapStateToProps = (state: IStoreState) => ({
   message: state.testLongTask.message,
   progress: state.testLongTask.progress,
+  showProgressBar: state.testLongTask.showProgressBar,
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({

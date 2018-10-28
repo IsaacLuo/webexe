@@ -2,6 +2,7 @@ import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-s
 import config from '../../config'
 import uploadFile from '../../common/uploadFile'
 import { eventChannel } from 'redux-saga'
+import {Notification} from 'element-react'
 
 import {
   IAction,
@@ -14,6 +15,7 @@ import{
   START_TEST_LONG_TASK,
   PROGRESS_TEST_LONG_TASK,
   FINISH_TEST_LONG_TASK,
+  ABORT_TEST_LONG_TASK,
 } from './actions'
 
 export function* startTestLongTask(action) {
@@ -44,22 +46,27 @@ function initWebSocketTestLongTask() {
         if(res.prompt === '>>>') {
           ws.send('{}\n');
         } else {
-          if(res.type==='progress') {
-            emitter({
-              type: PROGRESS_TEST_LONG_TASK,
-              data: {message: res.message, progress:Math.ceil(res.progress*100)},
-            });
-          }
-          if(res.result) {
-            console.log('got result', res.result);
-            emitter({
-              type: FINISH_TEST_LONG_TASK,
-              data: {},
-            });
-          }else if(res.finish) {
-            console.log('finish')
-          } else {
-            console.log(res.message);
+          switch (res.type) {
+            case 'progress':
+              emitter({
+                type: PROGRESS_TEST_LONG_TASK,
+                data: {message: res.message, progress:Math.ceil(res.progress*100)},
+              });
+              break;
+            case 'result':
+              emitter({
+                type: FINISH_TEST_LONG_TASK,
+                data: {},
+              });
+              break;
+            case 'abort':
+              emitter({
+                type: ABORT_TEST_LONG_TASK,
+                data: {message: res.message},
+              });
+              break;
+            default:
+              console.warn('unknown message', res);
           }
         }
       } catch (err) {
@@ -78,8 +85,13 @@ function initWebSocketTestLongTask() {
   });
 }
 
+function* abortTestLongTask(action:IAction) {
+  yield call(Notification.error, action.data.message);
+}
+
 export default function* watchTestLongTask() {
   
   yield takeEvery(START_TEST_LONG_TASK, startTestLongTask);
+  yield takeEvery(ABORT_TEST_LONG_TASK, abortTestLongTask);
   
 }

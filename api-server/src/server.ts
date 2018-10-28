@@ -86,18 +86,7 @@ app.all('/api/test', userMustLoggedIn, (req :Request, res: Response) => {
   res.json({message:'OK'});
 });
 
-function verifyToken(ws, req, next) {
-  console.log(req.query.token);
-  ws.json = obj=>{ws.send(JSON.stringify(obj))};
-  if(req.query.token) {
-    ws.json({prompt:'>>>'});
-    next();
-  }
-  else {
-    ws.json({err:'no token'})
-    ws.close();
-  }
-}
+
 
 /**
  * upload files to the server, 
@@ -142,10 +131,45 @@ app.get([
   res.sendFile(path.join(tempPath, req.params.id));
 });
 
+
+const runningPythonTask = {
+  mergeLightCycler:0,
+  testLongTask:0,
+};
+
+function ableToRunTask(taskName: string, limit:number = 1) {
+  return (ws, req, next) => {
+    if (runningPythonTask[taskName] === undefined) {
+      runningPythonTask[taskName] = 0;
+    }
+    if (runningPythonTask[taskName] === 0) {
+      next();
+    } else {
+      console.log('already running '+ taskName);
+      ws.send(JSON.stringify({type:'abort', message:`another ${taskName} task is running, please try again later`}));
+      ws.close();
+    }
+  }
+}
+
+function verifyToken(ws, req, next) {
+  console.log(req.query.token);
+  ws.json = obj=>{ws.send(JSON.stringify(obj))};
+  if(req.query.token) {
+    ws.json({prompt:'>>>'});
+    next();
+  }
+  else {
+    ws.json({err:'no token'});
+    ws.close();
+  }
+}
+
 /**
  * run mergeLightCycler python
  */
-app.ws('/api/ws/mergeLightCycler', verifyToken, function(ws, req) {
+app.ws('/api/ws/mergeLightCycler',ableToRunTask('mergeLightCycler'), verifyToken, function(ws, req) {
+
   ws.on('message', raw => {
     const msg = JSON.parse(raw);
     ws.json({finish:false, message:'accepted', ref: msg});
@@ -167,22 +191,24 @@ app.ws('/api/ws/mergeLightCycler', verifyToken, function(ws, req) {
 /**
  * run test long task python
  */
-app.ws('/api/ws/testLongTask', verifyToken, function(ws, req) {
-  ws.on('message', raw => {
-    const msg = JSON.parse(raw);
-    ws.json({finish:false, message:'accepted', ref: msg});
+app.ws('/api/ws/testLongTask', ableToRunTask('testLongTask'), verifyToken, async (ws, req) => {
+  
+    ws.on('message', async raw => {
+      const msg = JSON.parse(raw);
+      ws.json({finish:false, message:'accepted', ref: msg});
 
-    // run python now
-    runPython('./scripts/test_long_task.py', null,
-    obj => {
-      console.log(obj);
-      ws.json(obj);
-    }, errMsg => {
-      console.log(errMsg);
-      ws.json({type:'log', message: errMsg});
+      // run python now
+      runningPythonTask['testLongTask']++;
+      await runPython('./scripts/test_long_task.py', null,
+      obj => {
+        console.log(obj);
+        ws.json(obj);
+      }, errMsg => {
+        console.log(errMsg);
+        ws.json({type:'log', message: errMsg});
+      });
+      runningPythonTask['testLongTask']--;
     });
-
-  });
 });
 
 // ============================static files===================================
