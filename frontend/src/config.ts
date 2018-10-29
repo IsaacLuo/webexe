@@ -4,8 +4,8 @@ switch(process.env.NODE_ENV) {
     case 'production':
         const host = 'api.tools.cailab.org';
         config = {
-            backendURL: `http://${host}`,
-            pythonServerURL: `ws://${host}`,
+            backendURL: `https://${host}`,
+            pythonServerURL: `wss://${host}`,
         }
         break;
     default:
