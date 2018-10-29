@@ -3,11 +3,10 @@ import {Response, NextFunction} from 'express'
 import cors from 'cors'
 import * as bodyParser from 'body-parser'
 import multer from 'multer'
-import * as childProcess from 'child_process'
-import expressWs from 'express-ws'
 import fs from 'fs'
 import path from 'path'
-import {runPython} from './runPython'
+import hanldleWebSockets from './websocket';
+
 
 console.log(process.env.NODE_ENV)
 const conf = process.env.NODE_ENV === 'production' ? 
@@ -46,9 +45,10 @@ interface ExpressWS extends express.Express {
 }
 
 // express instance
-const app:ExpressWS = express()
+const app:ExpressWS = express();
 
-const ws = expressWs(app);
+// hanle websocket api
+hanldleWebSockets(app);
 
 // allow cors call
 app.use(cors())
@@ -86,18 +86,7 @@ app.all('/api/test', userMustLoggedIn, (req :Request, res: Response) => {
   res.json({message:'OK'});
 });
 
-function verifyToken(ws, req, next) {
-  console.log(req.query.token);
-  ws.json = obj=>{ws.send(JSON.stringify(obj))};
-  if(req.query.token) {
-    ws.json({prompt:'>>>'});
-    next();
-  }
-  else {
-    ws.json({err:'no token'})
-    ws.close();
-  }
-}
+
 
 /**
  * upload files to the server, 
@@ -142,24 +131,7 @@ app.get([
   res.sendFile(path.join(tempPath, req.params.id));
 });
 
-app.ws('/api/mergeLightCycler', verifyToken, function(ws, req) {
-  ws.on('message', raw => {
-    const msg = JSON.parse(raw);
-    ws.json({finish:false, message:'accepted', ref: msg});
 
-    // run python now
-    runPython('./scripts/merge_light_cycler.py',
-    raw+'\n',
-    obj => {
-      console.log(obj);
-      ws.json(obj);
-    }, errMsg => {
-      console.log(errMsg);
-      ws.json({message: errMsg});
-    });
-
-  });
-});
 
 // ============================static files===================================
 app.use('/public', express.static('public'));

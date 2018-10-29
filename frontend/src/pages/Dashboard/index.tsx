@@ -23,6 +23,10 @@ const DashboardItem = styled.div`
   border: solid 1px #777;
   border-radius: 25px;
   padding: 20px;
+  margin: 20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
 `;
 
 const DashboardItemTitle = styled.div`
@@ -47,6 +51,13 @@ class Dashboard extends React.Component<IProps, IState> {
           <p>merge a light cycler report table into the plate map</p>
           <Link to="/tools/MergeLightCyclerReport"><RoundButton type="primary">start</RoundButton></Link>
         </DashboardItem>
+
+        <DashboardItem>
+          <DashboardItemTitle>test</DashboardItemTitle>
+          <p>test a 60 seconds task</p>
+          <Link to="/tools/TestLongTask"><RoundButton type="primary">start</RoundButton></Link>
+        </DashboardItem>
+
       </DashboardPanel>
     )
   }

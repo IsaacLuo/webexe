@@ -14,8 +14,11 @@ import styled from 'styled-components'
 
 // components
 import NavBar from './components/NavBar'
+import FootBar from './components/FootBar'
 import Dashboard from './pages/Dashboard'
 import MergeLightCyclerReport from './pages/MergeLightCyclerReport'
+import TestLongTask from './pages/TestLongTask'
+
 import config from './config';
 import {
   TEST_CONNECTION
@@ -49,13 +52,15 @@ class App extends React.Component<IProps, IState> {
     return (
       <div className="App">
         <NavBar/>
+        <main>
         <MyPanel>
           <Route path='/' exact={true} component={Dashboard} />
           <Route path='/tools/MergeLightCyclerReport' exact={true} component={MergeLightCyclerReport} />
+          <Route path='/tools/TestLongTask' exact={true} component={TestLongTask} />
           <p className={`message-bar ${messageStyle}`}>{message}</p>
-          <p>{process.env.NODE_ENV} version 0.1.0</p>
-          <p>{JSON.stringify(process.env)} {JSON.stringify(config)}</p>
         </MyPanel>
+        </main>
+        <FootBar/>
       </div>
     );
   }

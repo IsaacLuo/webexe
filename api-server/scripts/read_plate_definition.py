@@ -1,13 +1,18 @@
 # coding: utf-8
 import re
+import sys
 from openpyxl import load_workbook,Workbook
 from openpyxl.styles import Color, PatternFill, Font, Border
 
 # A1 -> 0
 def well_name_to_id(well_name, cols=12):
-    match = re.match(r'([A-Za-z]+)(\d+)', well_name.upper())
-    row = ord(match[1]) - ord('A')
-    return row*cols+int(match[2])-1
+    try:
+        match = re.match(r'([A-Za-z]+)(\d+)', well_name.upper())
+        row = ord(match[1]) - ord('A')
+        return row*cols+int(match[2])-1
+    except:
+        print('error in analysing {}'.format(well_name), file=sys.stderr, flush=True)
+        return 0
 
 # 0 -> A1
 def id_to_well_name(id, cols=12):

@@ -37,7 +37,7 @@ export function runPython (params: string, dataIn?: any, onOutput?: (outputObj:a
     });
 
     if (dataIn) {
-      subProcess.stdin.write(dataIn);
+      subProcess.stdin.write(JSON.stringify(dataIn));
     }
 
   });
