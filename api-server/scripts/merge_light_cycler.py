@@ -8,8 +8,10 @@ import string
 import random
 import posixpath
 
-current_dir = posixpath.dirname(__file__)
-with open(posixpath.join(current_dir, '../config.dev.json')) as f:
+current_dir = os.getcwd()
+conf_file_path = os.path.realpath(posixpath.join(current_dir, 'config.dev.json'))
+print('{}------{}--- {}'.format(__file__, current_dir, conf_file_path),file=sys.stderr, flush=True)
+with open(conf_file_path) as f:
     temp_path = json.load(f)['tempPath']
 
 params = json.loads(sys.stdin.readline())

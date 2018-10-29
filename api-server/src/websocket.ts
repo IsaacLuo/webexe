@@ -103,7 +103,7 @@ export default function handleWebSockets(app) {
                 pyShell.on('stderr', message=>{
                   // console.log('stderr: ' + message);
                   if (ws.readyState === 1) {
-                    ws.json(message);
+                    ws.json({'log':message});
                   } else {
                     console.error('ws diconnected, terminating');
                     pyShell.terminate();
@@ -115,6 +115,10 @@ export default function handleWebSockets(app) {
                   // finish, pick another task to Run
                   pickTaskAndRun(taskName);
                 })
+                if(params) {
+                  pyShell.send(JSON.stringify(params));
+                }
+
                 // await runPython(script, params,
                 // obj => {
                 //   console.log(obj);
@@ -134,7 +138,7 @@ export default function handleWebSockets(app) {
             });
             break;
           case 'params':
-            params = msg;
+            params = msg.data;
             break;
           case 'abortTask':
             console.log(msg);
