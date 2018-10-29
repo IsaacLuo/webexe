@@ -1,6 +1,7 @@
 import expressWs from 'express-ws'
 import * as childProcess from 'child_process'
 import {runPython} from './runPython'
+import {PythonShell} from 'python-shell'
 
 
 export default function handleWebSockets(app) {
@@ -59,17 +60,27 @@ export default function handleWebSockets(app) {
                 ws.json({type:'start'});
                 // run python now
                 runningTask[taskName]++;
-                await runPython(script, params,
-                obj => {
-                  console.log(obj);
-                  ws.json(obj);
-                }, errMsg => {
-                  console.log(errMsg);
-                  ws.json({type:'log', message: errMsg});
+                const pyShell = new PythonShell(script, {
+                  parser: (data:string)=>JSON.parse(data),
+                  pythonOptions: ['-u'],
                 });
-                runningTask[taskName]--;
-                // finish, pick another task to Run
-                pickTaskAndRun(taskName);
+                pyShell.on('message', message=>{
+                  console.log({xxx: message})
+                })
+                pyShell.on('stderr', message=>{
+                  console.log('stderr: ' + message);
+                })
+                // await runPython(script, params,
+                // obj => {
+                //   console.log(obj);
+                //   ws.json(obj);
+                // }, errMsg => {
+                //   console.log(errMsg);
+                //   ws.json({type:'log', message: errMsg});
+                // });
+                // runningTask[taskName]--;
+                // // finish, pick another task to Run
+                // pickTaskAndRun(taskName);
               }
             }, (queueLength)=>{
               if (ws.readyState === 1) {

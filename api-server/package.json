@@ -11,6 +11,7 @@
     "find-remove": "^1.2.2",
     "jsonwebtoken": "^8.3.0",
     "multer": "^1.4.1",
+    "python-shell": "^1.0.6",
     "ws": "^6.1.0"
   },
   "scripts": {
