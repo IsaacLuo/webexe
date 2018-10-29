@@ -26,6 +26,7 @@ interface IProps {
   progress: number,
   showProgressBar: boolean,
   ws?: WebSocket,
+  enableRunButton: boolean,
   initialWebSocket: ()=>void,
   start: ()=>void,
   abort: ()=>void,
@@ -57,6 +58,7 @@ class TestLongTask extends React.Component<IProps, IState> {
       start,
       progress,
       showProgressBar,
+      enableRunButton,
     } = this.props;
     return (
       <MyPanel>
@@ -65,6 +67,7 @@ class TestLongTask extends React.Component<IProps, IState> {
             type="primary"
             onClick={start}
             style={{width:200}}
+            disabled={!enableRunButton}
             >
             Run
           </Button>
@@ -94,6 +97,7 @@ const mapStateToProps = (state: IStoreState) => ({
   progress: state.testLongTask.progress,
   showProgressBar: state.testLongTask.showProgressBar,
   ws: state.testLongTask.ws,
+  enableRunButton: state.testLongTask.enableRunButton,
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({

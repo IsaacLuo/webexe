@@ -33,6 +33,8 @@ export interface ITestLongTaskStoreState {
   progress: 0,
   showProgressBar: boolean,
   ws?: WebSocket,
+  taskId: string,
+  enableRunButton: boolean,
 }
 
 export interface IStoreState {

@@ -20,9 +20,9 @@ import{
 } from './actions'
 
 export function* startTestLongTask(action: IAction) {
-  const ws = yield select((state:IStoreState) =>state.testLongTask.ws);
+  const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
   if (ws) {
-    const channel = yield call(initWebSocketTestLongTask, ws);
+    const channel = yield call(initWebSocketTestLongTask, ws, taskId);
     
     while (true) {
       const newAction = yield take(channel)
@@ -37,9 +37,9 @@ export function* startTestLongTask(action: IAction) {
   }
 }
 
-function initWebSocketTestLongTask(ws:WebSocket) {
+function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
   return eventChannel( emitter => {
-    ws.send(JSON.stringify({type:'requestToStart'}));
+    ws.send(JSON.stringify({type:'requestToStart', data:{taskId}}));
     ws.onmessage = event => {
       console.debug('server ws: '+ event.data);
       try {
@@ -50,6 +50,12 @@ function initWebSocketTestLongTask(ws:WebSocket) {
             emitter({
               type: PROGRESS_TEST_LONG_TASK,
               data: {message: 'started', progress:0},
+            });
+            break;
+          case 'queueing':
+            emitter({
+              type: PROGRESS_TEST_LONG_TASK,
+              data: {message: res.message, progress:0},
             });
             break;
           case 'progress':
@@ -90,6 +96,10 @@ function initWebSocketTestLongTask(ws:WebSocket) {
 }
 
 function* abortTestLongTask(action:IAction) {
+  const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({type:'abortTask', data:{taskId}}));
+  }
   return;
 }
 

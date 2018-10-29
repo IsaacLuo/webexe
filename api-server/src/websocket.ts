@@ -7,6 +7,7 @@ import {PythonShell} from 'python-shell'
 export default function handleWebSockets(app) {
   const runningTask = {};
   const taskQueue = {};
+  const currentTask = {};
 
   const ws = expressWs(app);
 
@@ -23,15 +24,19 @@ export default function handleWebSockets(app) {
     }
   }
 
-  function addTaskInQueue(taskName: string, onAllowToRun:()=>void, onKeepWaiting:(queueLength:number)=>void){
+  function addTaskInQueue(taskProp:{taskName:string, taskId:string}, onAllowToRun:()=>void, onKeepWaiting:(queueLength:number)=>void){
+    const {taskName, taskId} = taskProp;
     if (taskQueue[taskName] === undefined) {
       taskQueue[taskName] = [];
       runningTask[taskName] = 0;
     }
     console.log('==============taskQueue=====', taskQueue[taskName].length);
-    taskQueue[taskName].push({onAllowToRun, onKeepWaiting});
+    taskQueue[taskName].push({taskId, onAllowToRun, onKeepWaiting});
+    console.log('taskQueue=', taskQueue[taskName].length, ' running =', runningTask[taskName] );
     if (taskQueue[taskName].length === 1 && runningTask[taskName] === 0) {
       pickTaskAndRun(taskName);
+    } else {
+      onKeepWaiting(taskQueue[taskName].length);
     }
   }
 
@@ -40,10 +45,27 @@ export default function handleWebSockets(app) {
     const len = queue.length;
     if (len > 0 ) {
       const task = queue.shift();
+      currentTask[taskName] = task;
       task.onAllowToRun();
-      for (const otherTask of queue) {
-        otherTask.onKeepWaiting(len);
+      for(let i=0;i<queue.length;i++) {
+        queue[i].onKeepWaiting(i+1)
       }
+    }
+  }
+
+  function abortTask(taskName: string, taskId: string) {
+    for (let i=0;i<taskQueue[taskName].length; i++) {
+      if (taskQueue[taskName][i].taskId === taskId) {
+        taskQueue[taskName].splice(i, 1);
+        break;
+      }
+    }
+    for (let i=0;i<taskQueue[taskName].length; i++) {
+      taskQueue[taskName][i].onKeepWaiting(i+1);
+    }
+    if (currentTask[taskName].taskId === taskId) {
+      currentTask[taskName].pyShell.terminate();
+      pickTaskAndRun(taskName);
     }
   }
 
@@ -54,9 +76,10 @@ export default function handleWebSockets(app) {
         const msg = JSON.parse(raw);
         switch (msg.type) {
           case 'requestToStart':
-            addTaskInQueue(taskName, async () => {
+            const taskId = msg.data.taskId;
+            addTaskInQueue({taskName, taskId:msg.data.taskId}, async () => {
               if (ws.readyState === 1) {
-                console.log(`${taskName} start`);
+                console.log(`${taskName}:${taskId} start`);
                 ws.json({type:'start'});
                 // run python now
                 runningTask[taskName]++;
@@ -64,11 +87,30 @@ export default function handleWebSockets(app) {
                   parser: (data:string)=>JSON.parse(data),
                   pythonOptions: ['-u'],
                 });
+                currentTask[taskName].pyShell = pyShell;
                 pyShell.on('message', message=>{
-                  console.log({xxx: message})
+                  // console.log(message)
+                  if (ws.readyState === 1) {
+                    ws.json(message);
+                  } else {
+                    console.error('ws diconnected, terminating');
+                    pyShell.terminate();
+                  }
                 })
                 pyShell.on('stderr', message=>{
-                  console.log('stderr: ' + message);
+                  // console.log('stderr: ' + message);
+                  if (ws.readyState === 1) {
+                    ws.json(message);
+                  } else {
+                    console.error('ws diconnected, terminating');
+                    pyShell.terminate();
+                  }
+                })
+                pyShell.on('close', message=>{
+                  console.log('finish', message);
+                  runningTask[taskName]--;
+                  // finish, pick another task to Run
+                  pickTaskAndRun(taskName);
                 })
                 // await runPython(script, params,
                 // obj => {
@@ -84,13 +126,17 @@ export default function handleWebSockets(app) {
               }
             }, (queueLength)=>{
               if (ws.readyState === 1) {
-                ws.json({type:'queueing', message: `queueing, ${queueLength} tasks in queue`});
+                ws.json({type:'queueing', message: `on hold, ${queueLength} ${queueLength===1?'task':'tasks'} in queue`});
               }
             });
             break;
           case 'params':
             params = msg;
-          break;
+            break;
+          case 'abortTask':
+            console.log(msg);
+            abortTask(taskName, msg.data.taskId);
+            break;
         }
       });
     }
