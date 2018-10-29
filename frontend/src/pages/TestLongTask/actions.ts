@@ -15,3 +15,6 @@ export const REJECT_TEST_LONG_TASK = 'REJECT_TEST_LONG_TASK'
 
 // user abort the task
 export const ABORT_TEST_LONG_TASK = 'ABORT_TEST_LONG_TASK'
+
+// websocket disconnected
+export const WS_DISCONNECTED_TEST_LONG_TASK = 'WS_DISCONNECTED_TEST_LONG_TASK'

@@ -12,18 +12,19 @@ import {
 } from '../../types'
 
 import{
+  CREATE_WS_TEST_LONG_TASK,
   START_TEST_LONG_TASK,
   PROGRESS_TEST_LONG_TASK,
   FINISH_TEST_LONG_TASK,
   REJECT_TEST_LONG_TASK,
   ABORT_TEST_LONG_TASK,
+  WS_DISCONNECTED_TEST_LONG_TASK,
 } from './actions'
 
 export function* startTestLongTask(action: IAction) {
   const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
-  if (ws) {
+  if (ws && ws.readyState === 1) {
     const channel = yield call(initWebSocketTestLongTask, ws, taskId);
-    
     while (true) {
       const newAction = yield take(channel)
       if (newAction.type) {
@@ -33,7 +34,10 @@ export function* startTestLongTask(action: IAction) {
       }
     }
   } else {
-    yield put({type:REJECT_TEST_LONG_TASK, data:{message: 'websocket failed'}}); 
+    yield put({type:REJECT_TEST_LONG_TASK, data:{message: 'websocket failed'}});
+    // try to connect again
+    yield put({type:CREATE_WS_TEST_LONG_TASK});
+    yield put({type:ABORT_TEST_LONG_TASK});
   }
 }
 
@@ -85,8 +89,8 @@ function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
     }
 
     ws.onclose = () => {
-      console.log('websocket closed')
-      emitter({exit: true})
+      console.log('websocket closed');
+      emitter({type:WS_DISCONNECTED_TEST_LONG_TASK});
     }
 
     return () => {
@@ -112,5 +116,6 @@ export default function* watchTestLongTask() {
   yield takeEvery(START_TEST_LONG_TASK, startTestLongTask);
   yield takeEvery(REJECT_TEST_LONG_TASK, rejectTestLongTask);
   yield takeEvery(ABORT_TEST_LONG_TASK, abortTestLongTask);
+  yield takeLatest(WS_DISCONNECTED_TEST_LONG_TASK, startTestLongTask);
   
 }

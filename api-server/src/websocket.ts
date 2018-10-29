@@ -54,6 +54,9 @@ export default function handleWebSockets(app) {
   }
 
   function abortTask(taskName: string, taskId: string) {
+    if (taskQueue[taskName] === undefined) {
+      return;
+    }
     for (let i=0;i<taskQueue[taskName].length; i++) {
       if (taskQueue[taskName][i].taskId === taskId) {
         taskQueue[taskName].splice(i, 1);
