@@ -44,6 +44,7 @@ class TestLongTask extends React.Component<IProps, IState> {
 
   public componentDidMount() {
     console.debug('TestLongTask mounted');
+    this.props.initialWebSocket();
     
   }
   public componentWillUnmount() {
