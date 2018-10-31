@@ -16,7 +16,15 @@ import{
   REPORT_GENERATED_MLCR,
   ActionUploadedPlateDefinitionFile,
   ActionUploadedLightCyclerReportFile,
-  START_MERGE_LIGHT_CYCLER_REPORT,
+  RESET_MLCR,
+
+  CREATE_WS,
+  WS_DISCONNECTED,
+  START_TASK,
+  PROGRESS,
+  FINISH_TASK,
+  REJECT_TASK,
+  ABORT_TASK,
   
 } from './actions'
 
@@ -59,23 +67,30 @@ function* uploadLightCyclerReportFile(action:IAction) {
 }
 
 export function* mergeLightCyclerReport(action) {
+  const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
   const plateDefinitionFileRefs = yield select((state:IStoreState) => state.mergeLightCyclerReport.plateDefinitionFileRefs);
   const lightCyclerReportFileRefs = yield select((state:IStoreState) => state.mergeLightCyclerReport.lightCyclerReportFileRefs);
 
-  const channel = yield call(initWebSocketMergeLightCycler, plateDefinitionFileRefs, lightCyclerReportFileRefs);
-  while (true) {
-    const newAction = yield take(channel)
-    if (newAction.type) {
-      yield put(newAction)
-    } else if(newAction.exit) {
-      break;
+  if (ws && ws.readyState === 1) {
+      const channel = yield call(initWebSocketMergeLightCycler, ws, taskId, plateDefinitionFileRefs, lightCyclerReportFileRefs);
+    while (true) {
+      const newAction = yield take(channel)
+      if (newAction.type) {
+        yield put(newAction)
+      } else if(newAction.exit) {
+        break;
+      }
     }
+  } else {
+    yield put({type:RESET_MLCR, data:{message: 'websocket failed'}});
+    // try to connect again
+    yield put({type:CREATE_WS});
+    yield put({type:ABORT_TASK});
   }
 }
 
-function initWebSocketMergeLightCycler(plateDefinitionFileRefs:INamedLink[], lightCyclerReportFileRefs:INamedLink[]) {
+function initWebSocketMergeLightCycler(ws:WebSocket, taskId:string, plateDefinitionFileRefs:INamedLink[], lightCyclerReportFileRefs:INamedLink[]) {
   return eventChannel( emitter => {
-    const ws = new WebSocket(`${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`);
 
     ws.onopen = () =>{
       console.log('ws onopen');
@@ -138,5 +153,5 @@ function initWebSocketMergeLightCycler(plateDefinitionFileRefs:INamedLink[], lig
 export default function* watchMergeLightCyclerReport() {
   yield takeEvery(UPLOAD_PLATE_DEFINITION_FILE, uploadPlateDefinitionFile);
   yield takeEvery(UPLOAD_LIGHT_CYCLER_REPORT_FILE, uploadLightCyclerReportFile);
-  yield takeLatest(START_MERGE_LIGHT_CYCLER_REPORT, mergeLightCyclerReport);
+  yield takeLatest(START_TASK, mergeLightCyclerReport);
 }

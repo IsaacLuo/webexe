@@ -6,7 +6,9 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 import {
-  START_TEST_LONG_TASK, ABORT_TEST_LONG_TASK, CREATE_WS_TEST_LONG_TASK,
+  START_TASK,
+  ABORT_TASK,
+  CREATE_WS,
 } from './actions';
 
 // other tools
@@ -101,9 +103,9 @@ const mapStateToProps = (state: IStoreState) => ({
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({
-  start: () => dispatch({type: START_TEST_LONG_TASK}),
-  abort: () => dispatch({type: ABORT_TEST_LONG_TASK, data:{message:''}}),
-  initialWebSocket: () => dispatch({type: CREATE_WS_TEST_LONG_TASK}),
+  start: () => dispatch({type: START_TASK}),
+  abort: () => dispatch({type: ABORT_TASK, data:{message:''}}),
+  initialWebSocket: () => dispatch({type: CREATE_WS}),
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(TestLongTask))

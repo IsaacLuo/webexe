@@ -12,6 +12,8 @@ import config from '../../config'
 import {Menu} from 'element-react'
 import styled from 'styled-components'
 
+import pageLinks from '../../common/pageLinks'
+
 const DashboardPanel = styled.div`
   width: 90%;
   display: flex;
@@ -44,20 +46,14 @@ interface IState {
 }
 class Dashboard extends React.Component<IProps, IState> {
   public render () {
+    const appBlocks = pageLinks.map(item => <DashboardItem key={item.link}>
+          <DashboardItemTitle>{item.title}</DashboardItemTitle>
+          <p>{item.discription}</p>
+          <Link to={item.link}><RoundButton type="primary">start</RoundButton></Link>
+        </DashboardItem>)
     return (
       <DashboardPanel>
-        <DashboardItem>
-          <DashboardItemTitle>merge light cycler reports</DashboardItemTitle>
-          <p>merge a light cycler report table into the plate map</p>
-          <Link to="/tools/MergeLightCyclerReport"><RoundButton type="primary">start</RoundButton></Link>
-        </DashboardItem>
-
-        <DashboardItem>
-          <DashboardItemTitle>test</DashboardItemTitle>
-          <p>test a 60 seconds task</p>
-          <Link to="/tools/TestLongTask"><RoundButton type="primary">start</RoundButton></Link>
-        </DashboardItem>
-
+        {appBlocks}
       </DashboardPanel>
     )
   }

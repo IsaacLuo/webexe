@@ -20,6 +20,8 @@ import MergeLightCyclerReport from './pages/MergeLightCyclerReport'
 import TestLongTask from './pages/TestLongTask'
 
 import config from './config';
+
+import pageLinks from './common/pageLinks'
 import {
   TEST_CONNECTION
 } from './actions'
@@ -55,8 +57,9 @@ class App extends React.Component<IProps, IState> {
         <main>
         <MyPanel>
           <Route path='/' exact={true} component={Dashboard} />
-          <Route path='/tools/MergeLightCyclerReport' exact={true} component={MergeLightCyclerReport} />
-          <Route path='/tools/TestLongTask' exact={true} component={TestLongTask} />
+          {
+            pageLinks.map(item=><Route key={item.link} path={item.link} exact={true} component={item.component} />)
+          }
           <p className={`message-bar ${messageStyle}`}>{message}</p>
         </MyPanel>
         </main>

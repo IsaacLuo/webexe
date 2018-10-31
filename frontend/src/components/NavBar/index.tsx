@@ -9,6 +9,7 @@ import { Dispatch } from 'redux'
 import config from '../../config'
 
 import {Menu} from 'element-react'
+import pageLinks from '../../common/pageLinks'
 
 
 interface IProps {
@@ -22,7 +23,7 @@ class NavBar extends React.Component<IProps, IState> {
       <Menu theme="dark" defaultActive="1" mode="horizontal">
         <Link to='/'><Menu.Item index="1">Home</Menu.Item></Link>
         <Menu.SubMenu index="2" title="tools">
-          <Link to='/tools/MergeLightCyclerReport'><Menu.Item index="2-1">Merge Light Cycler Report</Menu.Item></Link>
+          {pageLinks.map(item=><Link to={item.link} key={item.link}><Menu.Item index={item.link}>{item.title}</Menu.Item></Link>)}
         </Menu.SubMenu>
       </Menu>
     </header>

@@ -12,13 +12,13 @@ import {
 } from '../../types'
 
 import{
-  CREATE_WS_TEST_LONG_TASK,
-  START_TEST_LONG_TASK,
-  PROGRESS_TEST_LONG_TASK,
-  FINISH_TEST_LONG_TASK,
-  REJECT_TEST_LONG_TASK,
-  ABORT_TEST_LONG_TASK,
-  WS_DISCONNECTED_TEST_LONG_TASK,
+  CREATE_WS,
+  START_TASK,
+  PROGRESS,
+  FINISH_TASK,
+  REJECT_TASK,
+  ABORT_TASK,
+  WS_DISCONNECTED,
 } from './actions'
 
 export function* startTestLongTask(action: IAction) {
@@ -34,10 +34,10 @@ export function* startTestLongTask(action: IAction) {
       }
     }
   } else {
-    yield put({type:REJECT_TEST_LONG_TASK, data:{message: 'websocket failed'}});
+    yield put({type:REJECT_TASK, data:{message: 'websocket failed'}});
     // try to connect again
-    yield put({type:CREATE_WS_TEST_LONG_TASK});
-    yield put({type:ABORT_TEST_LONG_TASK});
+    yield put({type:CREATE_WS});
+    yield put({type:ABORT_TASK});
   }
 }
 
@@ -52,36 +52,34 @@ function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
           case 'prompt':
             ws.send('{}\n');
             emitter({
-              type: PROGRESS_TEST_LONG_TASK,
+              type: PROGRESS,
               data: {message: 'started', progress:0},
             });
             break;
           case 'queueing':
             emitter({
-              type: PROGRESS_TEST_LONG_TASK,
+              type: PROGRESS,
               data: {message: res.message, progress:0},
             });
             break;
           case 'progress':
             emitter({
-              type: PROGRESS_TEST_LONG_TASK,
+              type: PROGRESS,
               data: {message: res.message, progress:Math.ceil(res.progress*100)},
             });
             break;
           case 'result':
             emitter({
-              type: FINISH_TEST_LONG_TASK,
+              type: FINISH_TASK,
               data: {},
             });
             break;
           case 'rejected':
             emitter({
-              type: REJECT_TEST_LONG_TASK,
+              type: REJECT_TASK,
               data: {message: res.message},
             });
             break;
-          default:
-            console.warn('unknown message', res);
         }
       } catch (err) {
         console.error(event.data);
@@ -90,7 +88,7 @@ function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
 
     ws.onclose = () => {
       console.log('websocket closed');
-      emitter({type:WS_DISCONNECTED_TEST_LONG_TASK});
+      emitter({type:WS_DISCONNECTED});
     }
 
     return () => {
@@ -113,9 +111,9 @@ function* rejectTestLongTask(action:IAction) {
 
 export default function* watchTestLongTask() {
   
-  yield takeEvery(START_TEST_LONG_TASK, startTestLongTask);
-  yield takeEvery(REJECT_TEST_LONG_TASK, rejectTestLongTask);
-  yield takeEvery(ABORT_TEST_LONG_TASK, abortTestLongTask);
-  yield takeLatest(WS_DISCONNECTED_TEST_LONG_TASK, startTestLongTask);
+  yield takeEvery(START_TASK, startTestLongTask);
+  yield takeEvery(REJECT_TASK, rejectTestLongTask);
+  yield takeEvery(ABORT_TASK, abortTestLongTask);
+  yield takeLatest(WS_DISCONNECTED, startTestLongTask);
   
 }

@@ -9,11 +9,11 @@ import {
   } from '../../types'
 
 import{
-  PROGRESS_TEST_LONG_TASK,
-  FINISH_TEST_LONG_TASK,
-  ABORT_TEST_LONG_TASK,
-  CREATE_WS_TEST_LONG_TASK,
-  START_TEST_LONG_TASK,
+  PROGRESS,
+  FINISH_TASK,
+  ABORT_TASK,
+  CREATE_WS,
+  START_TASK,
 } from './actions'
 
 import config from '../../config'
@@ -27,33 +27,33 @@ export default function reducer(state:ITestLongTaskStoreState  = {
   taskId: '',
 }, action: IAction) {
   switch (action.type) {
-    case CREATE_WS_TEST_LONG_TASK:
+    case CREATE_WS:
       return {
         ...state,
         ws: new WebSocket(`${config.pythonServerURL}/api/ws/testLongTask?token=1234`),
       }
     
-    case START_TEST_LONG_TASK:
+    case START_TASK:
       return {
         ...state,
         enableRunButton: false,
         taskId: Math.random().toString(36).substr(2),
       }
 
-    case PROGRESS_TEST_LONG_TASK:
+    case PROGRESS:
       return {
         ...state,
         message: action.data.message,
         progress: action.data.progress,
         
       }
-    case FINISH_TEST_LONG_TASK:
+    case FINISH_TASK:
       return {
         ...state,
         message:'finish long task',
         enableRunButton: true,
       }
-    case ABORT_TEST_LONG_TASK:
+    case ABORT_TASK:
       return {
         ...state,
         message: 'aborted',

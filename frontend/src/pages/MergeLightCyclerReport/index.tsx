@@ -6,7 +6,9 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 import {
-  START_MERGE_LIGHT_CYCLER_REPORT,
+  START_TASK,
+  ABORT_TASK,
+  CREATE_WS,
   RESET_MLCR,
 } from './actions';
 
@@ -166,7 +168,7 @@ const mapStateToProps = (state: IStoreState) => ({
 const mapDispatchToProps = (dispatch :Dispatch) => ({
   uploadPlateDefinitionFile: (file:File) => dispatch({type: UPLOAD_PLATE_DEFINITION_FILE, data:{file}}),
   uploadLightCyclerReportFile: (file:File) => dispatch({type: UPLOAD_LIGHT_CYCLER_REPORT_FILE, data:{file}}),
-  start: () => dispatch({type: START_MERGE_LIGHT_CYCLER_REPORT}),
+  start: () => dispatch({type: START_TASK}),
   clear: () => dispatch({type: RESET_MLCR})
 })
 
