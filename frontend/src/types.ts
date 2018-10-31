@@ -23,6 +23,13 @@ export interface INamedLink {
 }
 
 export interface IMergeLightCyclerReportsStoreState {
+  message: string,
+  progress: 0,
+  showProgressBar: boolean,
+  ws?: WebSocket,
+  taskId: string,
+  enableRunButton: boolean,
+  
   plateDefinitionFileRefs: INamedLink[],
   lightCyclerReportFileRefs: INamedLink[],
   mergedResultFileRefs: INamedLink[],

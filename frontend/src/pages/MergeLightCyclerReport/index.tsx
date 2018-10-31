@@ -44,10 +44,17 @@ interface IProps {
   plateDefinitionFileRefs: INamedLink[],
   lightCyclerReportFileRefs: INamedLink[],
   mergedResultFileRefs: INamedLink[],
-  ws: WebSocket,
+  message: string,
+  progress: 0,
+  showProgressBar: boolean,
+  ws?: WebSocket,
+  taskId: string,
+  enableRunButton: boolean,
   uploadPlateDefinitionFile: (file:File) => void,
   uploadLightCyclerReportFile: (file:File) => void,
+  initialWebSocket:()=>void,
   start: ()=>void,
+  abort: ()=>void,
   clear: ()=>void,
 }
 interface IState {
@@ -159,11 +166,26 @@ class MergeLightCyclerReport extends React.Component<IProps, IState> {
   }
 }
 
-const mapStateToProps = (state: IStoreState) => ({
-  plateDefinitionFileRefs: state.mergeLightCyclerReport.plateDefinitionFileRefs,
-  lightCyclerReportFileRefs: state.mergeLightCyclerReport.lightCyclerReportFileRefs,
-  mergedResultFileRefs: state.mergeLightCyclerReport.mergedResultFileRefs,
-})
+const mapStateToProps = (state: IStoreState) => {
+  const {
+    message,
+    progress,
+    ws,
+    enableRunButton,
+    plateDefinitionFileRefs,
+    lightCyclerReportFileRefs,
+    mergedResultFileRefs,
+  } = state.mergeLightCyclerReport;
+  return {
+    message,
+    progress,
+    ws,
+    enableRunButton,
+    plateDefinitionFileRefs,
+    lightCyclerReportFileRefs,
+    mergedResultFileRefs,
+  }
+}
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({
   uploadPlateDefinitionFile: (file:File) => dispatch({type: UPLOAD_PLATE_DEFINITION_FILE, data:{file}}),
