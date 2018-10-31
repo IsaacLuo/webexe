@@ -66,7 +66,7 @@ function* uploadLightCyclerReportFile(action:IAction) {
   }
 }
 
-export function* mergeLightCyclerReport(action) {
+export function* startTask(action) {
   const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
   const plateDefinitionFileRefs = yield select((state:IStoreState) => state.mergeLightCyclerReport.plateDefinitionFileRefs);
   const lightCyclerReportFileRefs = yield select((state:IStoreState) => state.mergeLightCyclerReport.lightCyclerReportFileRefs);
@@ -153,5 +153,5 @@ function initWebSocketMergeLightCycler(ws:WebSocket, taskId:string, plateDefinit
 export default function* watchMergeLightCyclerReport() {
   yield takeEvery(UPLOAD_PLATE_DEFINITION_FILE, uploadPlateDefinitionFile);
   yield takeEvery(UPLOAD_LIGHT_CYCLER_REPORT_FILE, uploadLightCyclerReportFile);
-  yield takeLatest(START_TASK, mergeLightCyclerReport);
+  yield takeLatest(START_TASK, startTask);
 }

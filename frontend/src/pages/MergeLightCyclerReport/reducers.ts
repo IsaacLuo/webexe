@@ -13,12 +13,20 @@ import{
   UPLOADED_LIGHT_CYCLER_REPORT_FILE,
   REPORT_GENERATED_MLCR,
   RESET_MLCR,
+  CREATE_WS,
 } from './actions'
+
+import config from '../../config'
 
 export default function reducer(state:IMergeLightCyclerReportsStoreState  = {
   plateDefinitionFileRefs: [],
   lightCyclerReportFileRefs: [],
   mergedResultFileRefs: [],
+  message: '',
+  progress: 0,
+  showProgressBar: false,
+  taskId: '',
+  enableRunButton: true,
 }, action: IAction) {
   switch (action.type) {
     case UPLOADED_PLATE_DEFINITION_FILE:
@@ -49,6 +57,12 @@ export default function reducer(state:IMergeLightCyclerReportsStoreState  = {
         plateDefinitionFileRefs: [],
         lightCyclerReportFileRefs: [],
         mergedResultFileRefs: [],
+      }
+
+    case CREATE_WS:
+      return {
+        ...state,
+        ws: new WebSocket(`${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`),
       }
 
   }
