@@ -1,7 +1,7 @@
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
 import config from '../../config'
 import uploadFile from '../../common/uploadFile'
-import { eventChannel } from 'redux-saga'
+import { eventChannel, delay } from 'redux-saga'
 import {Notification} from 'element-react'
 
 import {
@@ -9,6 +9,7 @@ import {
   IFileUploadAction,
   IStoreState,
   INamedLink,
+  ITestLongTaskStoreState,
 } from '../../types'
 
 import{
@@ -19,31 +20,30 @@ import{
   REJECT_TASK,
   ABORT_TASK,
   WS_DISCONNECTED,
+  SERVER_MESSAGE,
+  SET_WS,
 } from './actions'
 
-export function* startTestLongTask(action: IAction) {
-  const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
+export function* createWebSocket(action: IAction) {
+  const {ws, taskId} = (yield select((state:IStoreState) =>state.testLongTask)) as ITestLongTaskStoreState;
   if (ws && ws.readyState === 1) {
-    const channel = yield call(initWebSocketTestLongTask, ws, taskId);
-    while (true) {
-      const newAction = yield take(channel)
-      if (newAction.type) {
-        yield put(newAction)
-      } else if(newAction.exit) {
-        break;
-      }
+    ws.close();
+  }
+  const newWS = new WebSocket(`${config.pythonServerURL}/api/ws/testLongTask?token=1234`);
+  yield put({type:SET_WS, data:newWS});
+  const channel = yield call(initWebSocketTestLongTask, newWS, taskId);
+  while (true) {
+    const newAction = yield take(channel)
+    if (newAction.type) {
+      yield put(newAction)
+    } else if(newAction.exit) {
+      break;
     }
-  } else {
-    yield put({type:REJECT_TASK, data:{message: 'websocket failed'}});
-    // try to connect again
-    yield put({type:CREATE_WS});
-    yield put({type:ABORT_TASK});
   }
 }
 
 function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
   return eventChannel( emitter => {
-    ws.send(JSON.stringify({type:'requestToStart', data:{taskId}}));
     ws.onmessage = event => {
       console.debug('server ws: '+ event.data);
       try {
@@ -58,8 +58,8 @@ function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
             break;
           case 'queueing':
             emitter({
-              type: PROGRESS,
-              data: {message: res.message, progress:0},
+              type: SERVER_MESSAGE,
+              data: {message: res.message},
             });
             break;
           case 'progress':
@@ -80,6 +80,12 @@ function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
               data: {message: res.message},
             });
             break;
+          case 'message':
+            emitter({
+              type: SERVER_MESSAGE,
+              data: {message: res.message},
+            });
+            break;
         }
       } catch (err) {
         console.error(event.data);
@@ -97,6 +103,25 @@ function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
   });
 }
 
+function* startTestLongTask() {
+  const {ws, taskId} = (yield select((state:IStoreState) =>state.testLongTask)) as ITestLongTaskStoreState;
+  if(ws) {
+    console.log(ws, ws.readyState);
+  }
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({type:'requestToStart', data:{taskId}}));
+    // ws.send(JSON.stringify({type:'requestToStart', data:{taskId}}));
+  } else {
+    yield put({type:WS_DISCONNECTED});
+  }
+}
+
+function* onWebsocketDisconnected() {
+  Notification.error('disconnected from the server');
+  yield call(delay, 10000);
+  yield put({type:CREATE_WS});
+}
+
 function* abortTestLongTask(action:IAction) {
   const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
   if (ws && ws.readyState === 1) {
@@ -110,10 +135,10 @@ function* rejectTestLongTask(action:IAction) {
 }
 
 export default function* watchTestLongTask() {
-  
+  yield takeLatest(CREATE_WS, createWebSocket);
   yield takeEvery(START_TASK, startTestLongTask);
   yield takeEvery(REJECT_TASK, rejectTestLongTask);
   yield takeEvery(ABORT_TASK, abortTestLongTask);
-  yield takeLatest(WS_DISCONNECTED, startTestLongTask);
+  yield takeLatest(WS_DISCONNECTED, onWebsocketDisconnected);
   
 }

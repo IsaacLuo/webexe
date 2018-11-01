@@ -9,11 +9,13 @@ import {
   } from '../../types'
 
 import{
+  SERVER_MESSAGE,
   PROGRESS,
   FINISH_TASK,
   ABORT_TASK,
   CREATE_WS,
   START_TASK,
+  SET_WS,
 } from './actions'
 
 import config from '../../config'
@@ -27,10 +29,10 @@ export default function reducer(state:ITestLongTaskStoreState  = {
   taskId: '',
 }, action: IAction) {
   switch (action.type) {
-    case CREATE_WS:
+    case SET_WS:
       return {
         ...state,
-        ws: new WebSocket(`${config.pythonServerURL}/api/ws/testLongTask?token=1234`),
+        ws: action.data,
       }
     
     case START_TASK:
@@ -46,6 +48,11 @@ export default function reducer(state:ITestLongTaskStoreState  = {
         message: action.data.message,
         progress: action.data.progress,
         
+      }
+    case SERVER_MESSAGE:
+      return {
+        ...state,
+        message: action.data.message,
       }
     case FINISH_TASK:
       return {

@@ -7,7 +7,6 @@ import fs from 'fs'
 import path from 'path'
 import hanldleWebSockets from './websocket';
 
-
 console.log(process.env.NODE_ENV)
 const conf = process.env.NODE_ENV === 'production' ? 
   require('../config.dev.json') :
@@ -19,8 +18,6 @@ if (!fs.existsSync(tempPath)) {
     console.log('created folder '+tempPath);
   });
 }
-
-
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

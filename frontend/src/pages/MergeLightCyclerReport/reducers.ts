@@ -59,12 +59,6 @@ export default function reducer(state:IMergeLightCyclerReportsStoreState  = {
         mergedResultFileRefs: [],
       }
 
-    case CREATE_WS:
-      return {
-        ...state,
-        ws: new WebSocket(`${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`),
-      }
-
   }
   return state;
 }

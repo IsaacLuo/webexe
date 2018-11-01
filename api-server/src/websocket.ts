@@ -24,6 +24,14 @@ export default function handleWebSockets(app) {
     }
   }
 
+  function getQueueSize(taskName:string) {
+    if (taskQueue[taskName] === undefined) {
+      taskQueue[taskName] = [];
+      runningTask[taskName] = 0;
+    }
+    return taskQueue[taskName].length + runningTask[taskName];
+  }
+
   function addTaskInQueue(taskProp:{taskName:string, taskId:string}, onAllowToRun:()=>void, onKeepWaiting:(queueLength:number)=>void){
     const {taskName, taskId} = taskProp;
     if (taskQueue[taskName] === undefined) {
@@ -75,8 +83,11 @@ export default function handleWebSockets(app) {
   function handleTask(taskName:string, script: string) {
     return async (ws, req) => {
       let params:any = null;
+      // const queueSize = getQueueSize(taskName);
+      ws.json({type:'message', message:'ready'});
         ws.on('message', async raw => {
         const msg = JSON.parse(raw);
+        console.debug(msg);
         switch (msg.type) {
           case 'requestToStart':
             const taskId = msg.data.taskId;
