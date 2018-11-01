@@ -21,75 +21,95 @@ import{
   ABORT_TASK,
   WS_DISCONNECTED,
   SERVER_MESSAGE,
+  SERVER_RESULT,
   SET_WS,
+  HEARTBEAT,
 } from './actions'
 
-export function* createWebSocket(action: IAction) {
-  const {ws, taskId} = (yield select((state:IStoreState) =>state.testLongTask)) as ITestLongTaskStoreState;
-  if (ws && ws.readyState === 1) {
-    ws.close();
+const wsURL = `${config.pythonServerURL}/api/ws/testLongTask?token=1234`;
+type IPageStoreState = ITestLongTaskStoreState;
+
+function* heartBeat(action: IAction) {
+  const ws = action.data;
+  yield call(delay, 30000);
+  if(ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({type:'heartbeat'}));
   }
-  const newWS = new WebSocket(`${config.pythonServerURL}/api/ws/testLongTask?token=1234`);
-  yield put({type:SET_WS, data:newWS});
-  const channel = yield call(initWebSocketTestLongTask, newWS, taskId);
+  yield put({type:HEARTBEAT});
+}
+
+export function* createWebSocket(action: IAction) {
+  const pageState:IPageStoreState = yield select((state:IStoreState) =>state.mergeLightCyclerReport);
+  let ws = pageState.ws;
+  const {taskId} = pageState;
+  if (!ws || ws.readyState !== 1) {
+    ws = new WebSocket(wsURL);
+    console.log('new ws', ws);
+    yield put({type:HEARTBEAT, data:ws});
+  }  
+  yield put({type:SET_WS, data: ws});
+  const channel = yield call(initWebSocket, ws, taskId);
   while (true) {
-    const newAction = yield take(channel)
-    if (newAction.type) {
-      yield put(newAction)
-    } else if(newAction.exit) {
-      break;
+    const res = yield take(channel)
+    switch (res.type) {
+      case 'prompt':
+        yield put({
+            type: PROGRESS,
+            data: {message: 'started', progress:0},
+          });
+          break;
+      case 'queueing':
+        yield put({
+          type: SERVER_MESSAGE,
+          data: {message: res.message},
+        });
+        break;
+      case 'progress':
+        yield put({
+          type: PROGRESS,
+          data: {message: res.message, progress:Math.ceil(res.progress*100)},
+        });
+        break;
+      case 'result':
+        yield put({
+          type: SERVER_RESULT,
+          data: {},
+        });
+        break;
+      case 'finish':
+        yield put({
+          type: FINISH_TASK,
+        });
+        break;
+      case 'rejected':
+        yield put({
+          type: REJECT_TASK,
+          data: {message: res.message},
+        });
+        break;
+      case 'message':
+        yield put({
+          type: SERVER_MESSAGE,
+          data: {message: res.message},
+        });
+        break;
     }
   }
 }
 
-function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
+function initWebSocket(ws:WebSocket, taskId:string) {
   return eventChannel( emitter => {
     ws.onmessage = event => {
       console.debug('server ws: '+ event.data);
       try {
         const res = JSON.parse(event.data);
-        switch (res.type) {
-          case 'prompt':
-            ws.send('{}\n');
-            emitter({
-              type: PROGRESS,
-              data: {message: 'started', progress:0},
-            });
-            break;
-          case 'queueing':
-            emitter({
-              type: SERVER_MESSAGE,
-              data: {message: res.message},
-            });
-            break;
-          case 'progress':
-            emitter({
-              type: PROGRESS,
-              data: {message: res.message, progress:Math.ceil(res.progress*100)},
-            });
-            break;
-          case 'result':
-            emitter({
-              type: FINISH_TASK,
-              data: {},
-            });
-            break;
-          case 'rejected':
-            emitter({
-              type: REJECT_TASK,
-              data: {message: res.message},
-            });
-            break;
-          case 'message':
-            emitter({
-              type: SERVER_MESSAGE,
-              data: {message: res.message},
-            });
-            break;
-        }
+        emitter(res);
       } catch (err) {
         console.error(event.data);
       }
+    }
+    ws.onopen = () => {
+      console.log('websocket open');
     }
 
     ws.onclose = () => {
@@ -103,15 +123,88 @@ function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
   });
 }
 
-function* startTestLongTask() {
-  const {ws, taskId} = (yield select((state:IStoreState) =>state.testLongTask)) as ITestLongTaskStoreState;
+function* startTask() {
+  const pageState:IPageStoreState = yield select((state:IStoreState) =>state.testLongTask)
+  const {
+    ws,
+    taskId,
+    } = pageState;
   if (ws && ws.readyState === 1) {
-    ws.send(JSON.stringify({type:'requestToStart', data:{taskId}}));
-    // ws.send(JSON.stringify({type:'requestToStart', data:{taskId}}));
+    ws.send(JSON.stringify({
+      type:'requestToStart', 
+      data:{
+        taskId,
+        params: {},
+      }
+    }));
   } else {
+    console.warn('ws wrong', ws, ws?ws.readyState:undefined);
     yield put({type:WS_DISCONNECTED});
   }
 }
+
+// function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
+//   return eventChannel( emitter => {
+//     ws.onmessage = event => {
+//       console.debug('server ws: '+ event.data);
+//       try {
+//         const res = JSON.parse(event.data);
+//         switch (res.type) {
+//           case 'prompt':
+//             ws.send('{}\n');
+//             emitter({
+//               type: PROGRESS,
+//               data: {message: 'started', progress:0},
+//             });
+//             break;
+//           case 'queueing':
+//             emitter({
+//               type: SERVER_MESSAGE,
+//               data: {message: res.message},
+//             });
+//             break;
+//           case 'progress':
+//             emitter({
+//               type: PROGRESS,
+//               data: {message: res.message, progress:Math.ceil(res.progress*100)},
+//             });
+//             break;
+//           case 'result':
+//             emitter({
+//               type: FINISH_TASK,
+//               data: {},
+//             });
+//             break;
+//           case 'rejected':
+//             emitter({
+//               type: REJECT_TASK,
+//               data: {message: res.message},
+//             });
+//             break;
+//           case 'message':
+//             emitter({
+//               type: SERVER_MESSAGE,
+//               data: {message: res.message},
+//             });
+//             break;
+//         }
+//       } catch (err) {
+//         console.error(event.data);
+//       }
+//     }
+
+//     ws.onclose = () => {
+//       console.log('websocket closed');
+//       emitter({type:WS_DISCONNECTED});
+//     }
+
+//     return () => {
+//       console.log('Socket off')
+//     }
+//   });
+// }
+
+
 
 function* onWebsocketDisconnected() {
   Notification.error('disconnected from the server');
@@ -119,7 +212,7 @@ function* onWebsocketDisconnected() {
   yield put({type:CREATE_WS});
 }
 
-function* abortTestLongTask(action:IAction) {
+function* abortTask(action:IAction) {
   const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
   if (ws && ws.readyState === 1) {
     ws.send(JSON.stringify({type:'abortTask', data:{taskId}}));
@@ -127,15 +220,16 @@ function* abortTestLongTask(action:IAction) {
   return;
 }
 
-function* rejectTestLongTask(action:IAction) {
+function* rejectTask(action:IAction) {
   yield call(Notification.error, action.data.message);
 }
 
 export default function* watchTestLongTask() {
   yield takeLatest(CREATE_WS, createWebSocket);
-  yield takeEvery(START_TASK, startTestLongTask);
-  yield takeEvery(REJECT_TASK, rejectTestLongTask);
-  yield takeEvery(ABORT_TASK, abortTestLongTask);
+  yield takeEvery(START_TASK, startTask);
+  yield takeEvery(REJECT_TASK, rejectTask);
+  yield takeEvery(ABORT_TASK, abortTask);
   yield takeLatest(WS_DISCONNECTED, onWebsocketDisconnected);
+  yield takeEvery(HEARTBEAT, heartBeat);
   
 }

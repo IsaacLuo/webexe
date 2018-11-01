@@ -34,20 +34,17 @@ export default function reducer(state:ITestLongTaskStoreState  = {
         ...state,
         ws: action.data,
       }
-    
     case START_TASK:
       return {
         ...state,
         enableRunButton: false,
         taskId: Math.random().toString(36).substr(2),
       }
-
     case PROGRESS:
       return {
         ...state,
         message: action.data.message,
         progress: action.data.progress,
-        
       }
     case SERVER_MESSAGE:
       return {

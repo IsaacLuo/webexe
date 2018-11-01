@@ -16,6 +16,9 @@ export const PROGRESS = 'PROGRESS' + TASK_APPENDIX;
 
 export const SERVER_MESSAGE = 'SERVER_MESSAGE' + TASK_APPENDIX;
 
+// server sents a result to client
+export const SERVER_RESULT = 'SERVER_RESULT' + TASK_APPENDIX;
+
 // show finish information
 export const FINISH_TASK = 'FINISH' + TASK_APPENDIX;
 
@@ -24,3 +27,5 @@ export const REJECT_TASK = 'REJECT' + TASK_APPENDIX;
 
 // user abort the task
 export const ABORT_TASK= 'ABORT' + TASK_APPENDIX;
+
+export const HEARTBEAT = 'HEARTBEAT' + TASK_APPENDIX;

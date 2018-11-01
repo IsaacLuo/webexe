@@ -1,10 +1,18 @@
 import { PythonShell } from "python-shell";
+import WebSocket from 'ws'
 
 export interface ITaskProp {
-  taskName:string,
   taskId:string, 
   params:any,
-  onAllowToRun?: (taskProp: ITaskProp)=>void,
-  onKeepWaiting?: (queueLength:number, taskProp: ITaskProp)=>void,
+}
+
+export interface IWSClient {
+  ws: WebSocket,
+  taskName:string,
+  status: 'ready'|'queueing'|'running'|'finish',
+  taskId?:string, 
+  params?:any,
+  onAllowToRun?: (IWSClient:IWSClient)=>void,
+  onKeepWaiting?: (IWSClient:IWSClient, queueLength:number)=>void,
   pyShell?:PythonShell,
 }

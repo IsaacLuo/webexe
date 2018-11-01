@@ -13,7 +13,7 @@ export function runPython (params: string, dataIn?: any, onOutput?: (outputObj:a
     const allObjects:any[] = [];
     
     rl.on('line', input => {
-      console.debug('debug: ', input);
+      // console.debug('debug: ', input);
       const messageObj = JSON.parse(input.toString());
       if(onOutput) {
         onOutput(messageObj, subProcess.stdin);
@@ -28,7 +28,7 @@ export function runPython (params: string, dataIn?: any, onOutput?: (outputObj:a
     });
     
     subProcess.on('close', (code) => {
-      console.debug('finish python', code);
+      // console.debug('finish python', code);
       if (code === 0) {
         resolve(allObjects);
       } else {

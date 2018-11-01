@@ -30,8 +30,11 @@ import{
   WS_DISCONNECTED,
   SERVER_MESSAGE,
   SET_WS,
+  HEARTBEAT,
   
 } from './actions'
+
+const wsURL = `${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`;
 
 export function* uploadTempFile(action:IFileUploadAction) {
   const {file} = action.data;
@@ -71,13 +74,23 @@ function* uploadLightCyclerReportFile(action:IAction) {
   }
 }
 
+function* heartBeat(action: IAction) {
+  const ws = action.data;
+  yield call(delay, 30000);
+  if(ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({type:'heartbeat'}));
+  }
+  yield put({type:HEARTBEAT});
+}
+
 export function* createWebSocket(action: IAction) {
   const pageState:IMergeLightCyclerReportsStoreState = yield select((state:IStoreState) =>state.mergeLightCyclerReport);
   let ws = pageState.ws;
   const {taskId} = pageState;
   if (!ws || ws.readyState !== 1) {
-    ws = new WebSocket(`${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`);  
+    ws = new WebSocket(wsURL);  
     console.log('new ws', ws);
+    yield put({type:HEARTBEAT, data:ws});
   }  
   yield put({type:SET_WS, data: ws});
   const channel = yield call(initWebSocket, ws, taskId);
