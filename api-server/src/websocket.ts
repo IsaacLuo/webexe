@@ -3,13 +3,15 @@ import * as childProcess from 'child_process'
 import {runPython} from './runPython'
 import {PythonShell} from 'python-shell'
 
+import {ITaskProp} from './types'
+
 
 export default function handleWebSockets(app) {
-  const runningTask = {};
-  const taskQueue = {};
-  const currentTask = {};
+  const taskQueue:{[key:string]:ITaskProp[]} = {};
+  const runningTask:{[key:string]:number} = {};
+  const currentTask:{[key:string]:ITaskProp} = {};
 
-  const ws = expressWs(app);
+  expressWs(app);
 
   function verifyToken(ws, req, next) {
     console.log(req.query.token);
@@ -24,27 +26,27 @@ export default function handleWebSockets(app) {
     }
   }
 
-  function getQueueSize(taskName:string) {
-    if (taskQueue[taskName] === undefined) {
-      taskQueue[taskName] = [];
-      runningTask[taskName] = 0;
-    }
-    return taskQueue[taskName].length + runningTask[taskName];
-  }
+  // function getQueueSize(taskName:string) {
+  //   if (taskQueue[taskName] === undefined) {
+  //     taskQueue[taskName] = [];
+  //     runningTask[taskName] = 0;
+  //   }
+  //   return taskQueue[taskName].length + runningTask[taskName];
+  // }
 
-  function addTaskInQueue(taskProp:{taskName:string, taskId:string}, onAllowToRun:()=>void, onKeepWaiting:(queueLength:number)=>void){
-    const {taskName, taskId} = taskProp;
+  function addTaskInQueue(taskProp:ITaskProp, onAllowToRun:(taskProp:ITaskProp)=>void, onKeepWaiting:(queueLength:number, taskProp:ITaskProp)=>void){
+    const {taskName, taskId, params} = taskProp;
     if (taskQueue[taskName] === undefined) {
       taskQueue[taskName] = [];
       runningTask[taskName] = 0;
     }
     console.log('==============taskQueue=====', taskQueue[taskName].length);
-    taskQueue[taskName].push({taskId, onAllowToRun, onKeepWaiting});
+    taskQueue[taskName].push({taskName, taskId, params, onAllowToRun, onKeepWaiting});
     console.log('taskQueue=', taskQueue[taskName].length, ' running =', runningTask[taskName] );
     if (taskQueue[taskName].length === 1 && runningTask[taskName] === 0) {
       pickTaskAndRun(taskName);
     } else {
-      onKeepWaiting(taskQueue[taskName].length);
+      onKeepWaiting(taskQueue[taskName].length, taskProp);
     }
   }
 
@@ -54,9 +56,9 @@ export default function handleWebSockets(app) {
     if (len > 0 ) {
       const task = queue.shift();
       currentTask[taskName] = task;
-      task.onAllowToRun();
+      task.onAllowToRun(task);
       for(let i=0;i<queue.length;i++) {
-        queue[i].onKeepWaiting(i+1)
+        queue[i].onKeepWaiting(i+1, task)
       }
     }
   }
@@ -72,7 +74,7 @@ export default function handleWebSockets(app) {
       }
     }
     for (let i=0;i<taskQueue[taskName].length; i++) {
-      taskQueue[taskName][i].onKeepWaiting(i+1);
+      taskQueue[taskName][i].onKeepWaiting(i+1, taskQueue[taskName][i]);
     }
     if (currentTask[taskName].taskId === taskId) {
       currentTask[taskName].pyShell.terminate();
@@ -82,79 +84,65 @@ export default function handleWebSockets(app) {
 
   function handleTask(taskName:string, script: string) {
     return async (ws, req) => {
-      let params:any = null;
       // const queueSize = getQueueSize(taskName);
       ws.json({type:'message', message:'ready'});
-        ws.on('message', async raw => {
-        const msg = JSON.parse(raw);
-        console.debug(msg);
-        switch (msg.type) {
-          case 'requestToStart':
-            const taskId = msg.data.taskId;
-            addTaskInQueue({taskName, taskId:msg.data.taskId}, async () => {
-              if (ws.readyState === 1) {
-                console.log(`${taskName}:${taskId} start`);
-                ws.json({type:'start'});
-                // run python now
-                runningTask[taskName]++;
-                const pyShell = new PythonShell(script, {
-                  parser: (data:string)=>JSON.parse(data),
-                  pythonOptions: ['-u'],
-                });
-                currentTask[taskName].pyShell = pyShell;
-                pyShell.on('message', message=>{
-                  // console.log(message)
-                  if (ws.readyState === 1) {
-                    ws.json(message);
-                  } else {
-                    console.error('ws diconnected, terminating');
-                    pyShell.terminate();
-                  }
-                })
-                pyShell.on('stderr', message=>{
-                  // console.log('stderr: ' + message);
-                  if (ws.readyState === 1) {
-                    ws.json({'log':message});
-                  } else {
-                    console.error('ws diconnected, terminating');
-                    pyShell.terminate();
-                  }
-                })
-                pyShell.on('close', message=>{
-                  console.log('finish', message);
-                  runningTask[taskName]--;
-                  // finish, pick another task to Run
-                  pickTaskAndRun(taskName);
-                })
-                if(params) {
-                  pyShell.send(JSON.stringify(params));
+      ws.on('message', async raw => {
+      const msg = JSON.parse(raw);
+      console.debug(msg);
+      switch (msg.type) {
+        case 'requestToStart':
+          const {taskId, params} = msg.data;
+          addTaskInQueue({taskName, taskId, params}, async (taskProp: ITaskProp) => {
+            if (ws.readyState === 1) {
+              console.log(`${taskName}:${taskId} start`);
+              ws.json({type:'start'});
+              // run python now
+              runningTask[taskName]++;
+              const pyShell = new PythonShell(script, {
+                parser: (data:string)=>JSON.parse(data),
+                pythonOptions: ['-u'],
+              });
+              currentTask[taskName].pyShell = pyShell;
+              pyShell.on('message', message=>{
+                // console.log(message)
+                if (ws.readyState === 1) {
+                  ws.json(message);
+                } else {
+                  console.error('ws diconnected, terminating');
+                  pyShell.terminate();
                 }
-
-                // await runPython(script, params,
-                // obj => {
-                //   console.log(obj);
-                //   ws.json(obj);
-                // }, errMsg => {
-                //   console.log(errMsg);
-                //   ws.json({type:'log', message: errMsg});
-                // });
-                // runningTask[taskName]--;
-                // // finish, pick another task to Run
-                // pickTaskAndRun(taskName);
+              })
+              pyShell.on('stderr', message=>{
+                // console.log('stderr: ' + message);
+                if (ws.readyState === 1) {
+                  ws.json({'log':message});
+                } else {
+                  console.error('ws diconnected, terminating');
+                  pyShell.terminate();
+                }
+              })
+              pyShell.on('close', message=>{
+                console.log('finish', message);
+                ws.json({type:'finish'});
+                runningTask[taskName]--;
+                // finish, pick another task to Run
+                pickTaskAndRun(taskName);
+              })
+              if(taskProp.params) {
+                console.log('sending params', taskProp.params)
+                pyShell.send(JSON.stringify(taskProp.params));
               }
-            }, (queueLength)=>{
-              if (ws.readyState === 1) {
-                ws.json({type:'queueing', message: `on hold, ${queueLength} ${queueLength===1?'task':'tasks'} in queue`});
-              }
-            });
-            break;
-          case 'params':
-            params = msg.data;
-            break;
-          case 'abortTask':
-            console.log(msg);
-            abortTask(taskName, msg.data.taskId);
-            break;
+            }
+          }, (queueLength)=>{
+            if (ws.readyState === 1) {
+              ws.json({type:'queueing', message: `on hold, ${queueLength} ${queueLength===1?'task':'tasks'} in queue`});
+            }
+          });
+          break;
+        case 'abortTask':
+          console.log(msg);
+          abortTask(taskName, msg.data.taskId);
+          break;
         }
       });
     }

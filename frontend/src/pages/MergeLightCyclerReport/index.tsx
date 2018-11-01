@@ -18,6 +18,9 @@ import {Button} from 'element-react'
 import Dropzone from 'react-dropzone'
 import { UPLOAD_PLATE_DEFINITION_FILE, UPLOAD_LIGHT_CYCLER_REPORT_FILE } from './actions';
 
+// components
+import ProgressMonitorPanel from '../../components/ProgressMonitorPanel'
+
 const MyPanel = styled.div`
   width:800px;
   display:flex;
@@ -69,16 +72,22 @@ class MergeLightCyclerReport extends React.Component<IProps, IState> {
     };
   }
 
+  public componentDidMount() {
+    this.props.initialWebSocket();
+  }
+
   public render() {
     const {
       plateDefinitionFileRefs,
       lightCyclerReportFileRefs,
       mergedResultFileRefs,
+      message,
+      progress,
+      showProgressBar,
     } = this.props;
 
-
     const results = mergedResultFileRefs.map(
-      v=> <p key={Math.random()}>result <a href={v.link} download={true}>result {v.name}</a></p>
+      v=> <p key={Math.random()}>result <a href={v.link} download={true}>{v.name}</a></p>
       );
 
     const uploadedPlateDefinitions = 
@@ -135,6 +144,12 @@ class MergeLightCyclerReport extends React.Component<IProps, IState> {
             clear
           </Button>
         </div>
+
+        <ProgressMonitorPanel
+          progress={progress}
+          showProgressBar={showProgressBar}
+          message={message}
+        />
         {results.length > 0 &&
           <div>
             <p> results </p>
@@ -175,6 +190,7 @@ const mapStateToProps = (state: IStoreState) => {
     plateDefinitionFileRefs,
     lightCyclerReportFileRefs,
     mergedResultFileRefs,
+    showProgressBar,
   } = state.mergeLightCyclerReport;
   return {
     message,
@@ -184,12 +200,14 @@ const mapStateToProps = (state: IStoreState) => {
     plateDefinitionFileRefs,
     lightCyclerReportFileRefs,
     mergedResultFileRefs,
+    showProgressBar,
   }
 }
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({
   uploadPlateDefinitionFile: (file:File) => dispatch({type: UPLOAD_PLATE_DEFINITION_FILE, data:{file}}),
   uploadLightCyclerReportFile: (file:File) => dispatch({type: UPLOAD_LIGHT_CYCLER_REPORT_FILE, data:{file}}),
+  initialWebSocket: ()=>dispatch({type:CREATE_WS}),
   start: () => dispatch({type: START_TASK}),
   clear: () => dispatch({type: RESET_MLCR})
 })

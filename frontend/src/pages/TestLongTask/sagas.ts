@@ -105,9 +105,6 @@ function initWebSocketTestLongTask(ws:WebSocket, taskId:string) {
 
 function* startTestLongTask() {
   const {ws, taskId} = (yield select((state:IStoreState) =>state.testLongTask)) as ITestLongTaskStoreState;
-  if(ws) {
-    console.log(ws, ws.readyState);
-  }
   if (ws && ws.readyState === 1) {
     ws.send(JSON.stringify({type:'requestToStart', data:{taskId}}));
     // ws.send(JSON.stringify({type:'requestToStart', data:{taskId}}));

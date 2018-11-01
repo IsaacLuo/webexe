@@ -7,23 +7,31 @@ from write_plate_definition import write_plate_definition
 import string
 import random
 import posixpath
+import time
+import webexe
 
 current_dir = os.getcwd()
 conf_file_path = os.path.realpath(posixpath.join(current_dir, 'config.dev.json'))
-print('{}------{}--- {}'.format(__file__, current_dir, conf_file_path),file=sys.stderr, flush=True)
+webexe.log(conf_file_path)
+
 with open(conf_file_path) as f:
     temp_path = json.load(f)['tempPath']
 
 params = json.loads(sys.stdin.readline())
-print('now start', file=sys.stderr, flush=True)
+webexe.log('now start')
+progress = 0.0
+webexe.progress(progress)
+
 tasks_count = min(len(params['plateDefinitionIds']), len(params['lightCyclerReportIds']))
+progress_step = 1.0/tasks_count/2.0
+
 for i in range(tasks_count):
     pd_id = params['plateDefinitionIds'][i]
     lc_id = params['lightCyclerReportIds'][i]
     # with open() as fpd, open(os.path.join(temp_path, lc_id)) as flc:
-    print('reading {}'.format(posixpath.join(temp_path, pd_id)), file=sys.stderr, flush=True)
+    webexe.log('reading {}'.format(posixpath.join(temp_path, pd_id)))
     plate = read_plate_definition(posixpath.join(temp_path, pd_id))
-    print('loading {}'.format(posixpath.join(temp_path, lc_id)), file=sys.stderr, flush=True)
+    webexe.log('loading {}'.format(posixpath.join(temp_path, lc_id)))
     # print(json.dumps(plate), file=sys.stderr, flush=True)
     with open(posixpath.join(temp_path, lc_id)) as f:
         lines = f.readlines()[2:]
@@ -45,11 +53,14 @@ for i in range(tasks_count):
                 plate['content'][well_id]['fill'] = "B0FBB5"
             else:
                 plate['content'][well_id]['fill'] = "FBBDB0"
-
+    progress += progress_step
+    webexe.progress(progress)
     target_filename = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8)) + '.xlsx'
-    print('writing {}'.format(target_filename), file=sys.stderr, flush=True)
+    webexe.log('writing {}'.format(target_filename))
     write_plate_definition(posixpath.join(temp_path, target_filename), plate)
-    output_data = json.dumps({'result': target_filename})
-    print(output_data, flush=True)
+    progress+=progress_step
+    webexe.progress(progress)
+    webexe.result({'input':{'plateDefinitionId': pd_id, 'lightCyclerReportId': lc_id}, 'output':target_filename})
+    
 
 

@@ -1,13 +1,15 @@
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
 import config from '../../config'
 import uploadFile from '../../common/uploadFile'
-import { eventChannel } from 'redux-saga'
+import { eventChannel, delay} from 'redux-saga'
+import {Notification} from 'element-react'
 
 import {
   IAction,
   IFileUploadAction,
   IStoreState,
   INamedLink,
+  IMergeLightCyclerReportsStoreState,
 } from '../../types'
 
 import{
@@ -19,12 +21,15 @@ import{
   RESET_MLCR,
 
   CREATE_WS,
-  WS_DISCONNECTED,
   START_TASK,
   PROGRESS,
+  SERVER_RESULT,
   FINISH_TASK,
   REJECT_TASK,
   ABORT_TASK,
+  WS_DISCONNECTED,
+  SERVER_MESSAGE,
+  SET_WS,
   
 } from './actions'
 
@@ -66,90 +71,90 @@ function* uploadLightCyclerReportFile(action:IAction) {
   }
 }
 
-export function* createWs(action) {
-  const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
-  const plateDefinitionFileRefs = yield select((state:IStoreState) => state.mergeLightCyclerReport.plateDefinitionFileRefs);
-  const lightCyclerReportFileRefs = yield select((state:IStoreState) => state.mergeLightCyclerReport.lightCyclerReportFileRefs);
-
-  if (ws && ws.readyState === 1) {
-      const channel = yield call(initWebSocketMergeLightCycler, ws, taskId, plateDefinitionFileRefs, lightCyclerReportFileRefs);
-    while (true) {
-      const newAction = yield take(channel)
-      if (newAction.type) {
-        yield put(newAction)
-      } else if(newAction.exit) {
+export function* createWebSocket(action: IAction) {
+  const pageState:IMergeLightCyclerReportsStoreState = yield select((state:IStoreState) =>state.mergeLightCyclerReport);
+  let ws = pageState.ws;
+  const {taskId} = pageState;
+  if (!ws || ws.readyState !== 1) {
+    ws = new WebSocket(`${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`);  
+    console.log('new ws', ws);
+  }  
+  yield put({type:SET_WS, data: ws});
+  const channel = yield call(initWebSocket, ws, taskId);
+  while (true) {
+    const res = yield take(channel)
+    switch (res.type) {
+      case 'prompt':
+        yield put({
+            type: PROGRESS,
+            data: {message: 'started', progress:0},
+          });
+          break;
+      case 'queueing':
+        yield put({
+          type: SERVER_MESSAGE,
+          data: {message: res.message},
+        });
         break;
-      }
+      case 'progress':
+        yield put({
+          type: PROGRESS,
+          data: {message: res.message, progress:Math.ceil(res.progress*100)},
+        });
+        break;
+      case 'result':
+        const plateDefinitionFileRefs = yield select((state:IStoreState) =>state.mergeLightCyclerReport.plateDefinitionFileRefs)
+        const {input:{plateDefinitionId}, output} = res.data;
+        const newName = plateDefinitionFileRefs.find(x=>x.id===plateDefinitionId).name;
+        yield put({
+          type: SERVER_RESULT,
+          data: {
+            id: output,
+            name: newName,
+            link:`${config.backendURL}/api/tempFile/${output}/as/${newName}`,
+          }
+        });
+        break;
+      case 'finish':
+        yield put({
+          type: FINISH_TASK,
+        });
+        break;
+      case 'rejected':
+        yield put({
+          type: REJECT_TASK,
+          data: {message: res.message},
+        });
+        break;
+      case 'message':
+        yield put({
+          type: SERVER_MESSAGE,
+          data: {message: res.message},
+        });
+        break;
     }
-  } else {
-    yield put({type:RESET_MLCR, data:{message: 'websocket failed'}});
-    // try to connect again
-    yield put({type:CREATE_WS});
-    yield put({type:ABORT_TASK});
-  }
-}
-export function* startTask(action) {
-  const {ws} = yield select((state:IStoreState) =>state.testLongTask);
-  if (ws && ws.readyState === 1) {
-    yield call(ws.send,JSON.stringify({type:'startTask', data:{}}));
-  } else {
-    yield put({type:WS_DISCONNECTED});
   }
 }
 
-function initWebSocketMergeLightCycler(ws:WebSocket, taskId:string, plateDefinitionFileRefs:INamedLink[], lightCyclerReportFileRefs:INamedLink[]) {
+function initWebSocket(ws:WebSocket, taskId:string) {
   return eventChannel( emitter => {
-
-    ws.onopen = () =>{
-      console.log('ws onopen');
-    };
-
-    let resultCount = 0;
-
-    /** 
-     * @param 
-     * {
-     *   plateDefinitionIds: string[], 
-     *   lightCyclerReportIds: string[],
-     * }
-     */
-    const pythonParams = {
-      plateDefinitionIds: plateDefinitionFileRefs.map(v => v.id),
-      lightCyclerReportIds: lightCyclerReportFileRefs.map(v => v.id),
-    }
-    console.warn(pythonParams);
-
     ws.onmessage = event => {
       console.debug('server ws: '+ event.data);
       try {
         const res = JSON.parse(event.data);
-        if(res.prompt === '>>>') {
-          ws.send(JSON.stringify(pythonParams))
-        } else {
-          if(res.result) {
-            console.log('got result', res.result);
-            const newName = plateDefinitionFileRefs[resultCount++].name;
-            emitter({
-              type: REPORT_GENERATED_MLCR,
-              data: {
-                id: res.result,
-                name: newName,
-                link:`${config.backendURL}/api/tempFile/${res.result}/as/${newName}`}
-            })
-          }else if(res.finish) {
-            console.log('finish')
-          } else {
-            console.log(res.message);
-          }
-        }
+        // console.log({res});
+        emitter(res);
       } catch (err) {
         console.error(event.data);
       }
     }
+    ws.onopen = () => {
+      console.log('websocket open');
+    }
 
     ws.onclose = () => {
-      console.log('websocket closed')
-      emitter({exit: true})
+      console.log('websocket closed');
+      emitter({type:WS_DISCONNECTED});
     }
 
     return () => {
@@ -158,9 +163,58 @@ function initWebSocketMergeLightCycler(ws:WebSocket, taskId:string, plateDefinit
   });
 }
 
+function* startTask() {
+  const pageState:IMergeLightCyclerReportsStoreState = yield select((state:IStoreState) =>state.mergeLightCyclerReport)
+  const {
+    ws,
+    taskId,
+    plateDefinitionFileRefs,
+    lightCyclerReportFileRefs,
+    } = pageState;
+  if(ws) {
+    console.log(ws, ws.readyState);
+  }
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({
+      type:'requestToStart', 
+      data:{
+        taskId,
+        params: {
+          plateDefinitionIds: plateDefinitionFileRefs.map(x=>x.id),
+          lightCyclerReportIds: lightCyclerReportFileRefs.map(x=>x.id),
+        }
+      }
+    }));
+  } else {
+    console.warn('ws wrong', ws, ws?ws.readyState:undefined);
+    yield put({type:WS_DISCONNECTED});
+  }
+}
+
+function* onWebsocketDisconnected() {
+  Notification.error('disconnected from the server');
+  yield call(delay, 10000);
+  yield put({type:CREATE_WS});
+}
+
+function* abortTask(action:IAction) {
+  const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({type:'abortTask', data:{taskId}}));
+  }
+  return;
+}
+
+function* rejectTask(action:IAction) {
+  yield call(Notification.error, action.data.message);
+}
+
 export default function* watchMergeLightCyclerReport() {
   yield takeEvery(UPLOAD_PLATE_DEFINITION_FILE, uploadPlateDefinitionFile);
   yield takeEvery(UPLOAD_LIGHT_CYCLER_REPORT_FILE, uploadLightCyclerReportFile);
-  yield takeEvery(CREATE_WS, createWs);
+  yield takeEvery(CREATE_WS, createWebSocket);
   yield takeLatest(START_TASK, startTask);
+  yield takeEvery(REJECT_TASK, rejectTask);
+  yield takeEvery(ABORT_TASK, abortTask);
+  yield takeLatest(WS_DISCONNECTED, onWebsocketDisconnected);
 }
