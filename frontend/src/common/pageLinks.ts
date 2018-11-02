@@ -1,5 +1,6 @@
 import MergeLightCyclerReport from "src/pages/MergeLightCyclerReport";
 import TestLongTask from "src/pages/TestLongTask";
+import TaskManager from 'src/pages/TaskManager';
 
 export default [
   {
@@ -13,5 +14,12 @@ export default [
     discription: 'test a 60 seconds task',
     link: '/tools/TestLongTask',
     component: TestLongTask,
+  },
+
+    {
+    title: 'task manager',
+    discription: 'task manager',
+    link: '/tools/TaskManager',
+    component: TaskManager,
   },
 ]

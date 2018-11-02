@@ -4,6 +4,7 @@ import {Notification} from 'element-react'
 import { IAction } from './types';
 import watchMergeLightCyclerReport from './pages/MergeLightCyclerReport/sagas'
 import watchTestLongTask from './pages/TestLongTask/sagas'
+import watchTaskManager from './pages/TaskManager/sagas'
 
 import axios from 'axios';
 import config from './config';
@@ -40,5 +41,6 @@ export default function* rootSaga() {
     fork(watchSystemMessage),
     fork(watchMergeLightCyclerReport),
     fork(watchTestLongTask),
+    fork(watchTaskManager),
   ]);
 }

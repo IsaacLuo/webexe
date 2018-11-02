@@ -6,6 +6,9 @@ export const CREATE_WS = 'CREATE_WS' + TASK_APPENDIX;
 export const SET_WS = 'SET_WS' + TASK_APPENDIX;
 
 // websocket disconnected
+export const END_WS = 'END_WS' + TASK_APPENDIX;
+
+// websocket disconnected
 export const WS_DISCONNECTED = 'WS_DISCONNECTED' + TASK_APPENDIX;
 
 // user starts the task
@@ -29,3 +32,5 @@ export const REJECT_TASK = 'REJECT' + TASK_APPENDIX;
 export const ABORT_TASK= 'ABORT' + TASK_APPENDIX;
 
 export const HEARTBEAT = 'HEARTBEAT' + TASK_APPENDIX;
+
+export const SET_CLIENT_ID = 'SET_CLIENT_ID' + TASK_APPENDIX;

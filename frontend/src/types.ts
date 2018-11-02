@@ -22,12 +22,15 @@ export interface INamedLink {
   link:string,
 }
 
+export type TaskStatus = 'init'|'ready'|'queueing'|'running'|'finish'|'aborted';
+
 export interface IMergeLightCyclerReportsStoreState {
   message: string,
   progress: 0,
+  taskStatus: TaskStatus,
   showProgressBar: boolean,
   ws?: WebSocket,
-  taskId: string,
+  clientId: string,
   enableRunButton: boolean,
   
   plateDefinitionFileRefs: INamedLink[],
@@ -38,14 +41,31 @@ export interface IMergeLightCyclerReportsStoreState {
 export interface ITestLongTaskStoreState {
   message: string,
   progress: 0,
+  taskStatus: TaskStatus,
   showProgressBar: boolean,
   ws?: WebSocket,
-  taskId: string,
+  clientId: string,
   enableRunButton: boolean,
+}
+
+export interface ITaskBrief {
+  type: string,
+  id:string,
+  status: string,
+  progress: number,
+  wsState: number,
+  createdAt: Date,
+}
+
+export interface ITaskManagerStoreState {
+  tasks: {[key:string]:ITaskBrief[]},
+  message: string,
+  ws?: WebSocket,
 }
 
 export interface IStoreState {
   app: IAppStoreState,
   mergeLightCyclerReport:IMergeLightCyclerReportsStoreState,
   testLongTask:ITestLongTaskStoreState,
+  taskManager:ITaskManagerStoreState,
 }

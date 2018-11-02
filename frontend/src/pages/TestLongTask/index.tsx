@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 // react-redux-router
-import { IStoreState, INamedLink } from '../../types'
+import { IStoreState, INamedLink, TaskStatus } from '../../types'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
@@ -9,6 +9,7 @@ import {
   START_TASK,
   ABORT_TASK,
   CREATE_WS,
+  END_WS,
 } from './actions';
 
 // other tools
@@ -26,10 +27,13 @@ const MyPanel = styled.div`
 interface IProps {
   message: string,
   progress: number,
+  taskStatus: TaskStatus,
   showProgressBar: boolean,
   ws?: WebSocket,
   enableRunButton: boolean,
+  clientId: string,
   initialWebSocket: ()=>void,
+  finalizeWebSocket: (ws:WebSocket)=>void,
   start: ()=>void,
   abort: ()=>void,
 }
@@ -47,11 +51,21 @@ class TestLongTask extends React.Component<IProps, IState> {
 
   public componentDidMount() {
     console.debug('TestLongTask mounted');
-    this.props.initialWebSocket();
-    
+    const {ws} = this.props;
+    if(!ws || ws.readyState !== 1) {
+      this.props.initialWebSocket();
+    } else {
+      console.debug('continue use ', ws);
+    }
   }
   public componentWillUnmount() {
     console.debug('TestLongTask unmounting');
+    const {ws, taskStatus} = this.props;
+    if(ws && ws.readyState === 1 && taskStatus === 'finish' || taskStatus === 'ready') {
+      console.debug('finalizing websocket');
+      this.props.finalizeWebSocket(ws!);
+    }
+    
   }
 
   public render() {
@@ -61,6 +75,7 @@ class TestLongTask extends React.Component<IProps, IState> {
       progress,
       showProgressBar,
       enableRunButton,
+      clientId,
     } = this.props;
     return (
       <MyPanel>
@@ -85,6 +100,7 @@ class TestLongTask extends React.Component<IProps, IState> {
           showProgressBar={showProgressBar}
           message={message}
         />
+        <div>{clientId}</div>
       </MyPanel>
     );
   }
@@ -97,15 +113,18 @@ class TestLongTask extends React.Component<IProps, IState> {
 const mapStateToProps = (state: IStoreState) => ({
   message: state.testLongTask.message,
   progress: state.testLongTask.progress,
+  taskStatus: state.testLongTask.taskStatus,
   showProgressBar: state.testLongTask.showProgressBar,
   ws: state.testLongTask.ws,
   enableRunButton: state.testLongTask.enableRunButton,
+  clientId: state.testLongTask.clientId,
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({
   start: () => dispatch({type: START_TASK}),
   abort: () => dispatch({type: ABORT_TASK, data:{message:''}}),
   initialWebSocket: () => dispatch({type: CREATE_WS}),
+  finalizeWebSocket: (ws) => dispatch({type: END_WS}),
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(TestLongTask))

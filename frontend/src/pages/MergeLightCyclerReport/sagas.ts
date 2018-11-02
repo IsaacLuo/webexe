@@ -86,14 +86,14 @@ function* heartBeat(action: IAction) {
 export function* createWebSocket(action: IAction) {
   const pageState:IMergeLightCyclerReportsStoreState = yield select((state:IStoreState) =>state.mergeLightCyclerReport);
   let ws = pageState.ws;
-  const {taskId} = pageState;
+  const {clientId} = pageState;
   if (!ws || ws.readyState !== 1) {
     ws = new WebSocket(wsURL);  
     console.log('new ws', ws);
     yield put({type:HEARTBEAT, data:ws});
   }  
   yield put({type:SET_WS, data: ws});
-  const channel = yield call(initWebSocket, ws, taskId);
+  const channel = yield call(initWebSocket, ws, clientId);
   while (true) {
     const res = yield take(channel)
     switch (res.type) {
@@ -149,7 +149,7 @@ export function* createWebSocket(action: IAction) {
   }
 }
 
-function initWebSocket(ws:WebSocket, taskId:string) {
+function initWebSocket(ws:WebSocket, clientId:string) {
   return eventChannel( emitter => {
     ws.onmessage = event => {
       console.debug('server ws: '+ event.data);
@@ -180,7 +180,7 @@ function* startTask() {
   const pageState:IMergeLightCyclerReportsStoreState = yield select((state:IStoreState) =>state.mergeLightCyclerReport)
   const {
     ws,
-    taskId,
+    clientId,
     plateDefinitionFileRefs,
     lightCyclerReportFileRefs,
     } = pageState;
@@ -191,7 +191,7 @@ function* startTask() {
     ws.send(JSON.stringify({
       type:'requestToStart', 
       data:{
-        taskId,
+        clientId,
         params: {
           plateDefinitionIds: plateDefinitionFileRefs.map(x=>x.id),
           lightCyclerReportIds: lightCyclerReportFileRefs.map(x=>x.id),
@@ -211,9 +211,9 @@ function* onWebsocketDisconnected() {
 }
 
 function* abortTask(action:IAction) {
-  const {ws,taskId} = yield select((state:IStoreState) =>state.testLongTask);
+  const {ws,clientId} = yield select((state:IStoreState) =>state.testLongTask);
   if (ws && ws.readyState === 1) {
-    ws.send(JSON.stringify({type:'abortTask', data:{taskId}}));
+    ws.send(JSON.stringify({type:'abortTask', data:{clientId}}));
   }
   return;
 }

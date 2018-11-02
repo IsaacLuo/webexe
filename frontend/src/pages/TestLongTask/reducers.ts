@@ -16,6 +16,7 @@ import{
   CREATE_WS,
   START_TASK,
   SET_WS,
+  SET_CLIENT_ID,
 } from './actions'
 
 import config from '../../config'
@@ -23,26 +24,34 @@ import config from '../../config'
 export default function reducer(state:ITestLongTaskStoreState  = {
   message: 'no message',
   progress: 0,
+  taskStatus: 'init',
   showProgressBar: true,
   ws: undefined,
   enableRunButton: true,
-  taskId: '',
+  clientId: 'no task ID',
 }, action: IAction) {
   switch (action.type) {
     case SET_WS:
       return {
         ...state,
+        taskStatus: 'ready',
         ws: action.data,
+      }
+    case SET_CLIENT_ID:
+      return {
+        ...state,
+        clientId: action.data,
       }
     case START_TASK:
       return {
         ...state,
+        taskStatus: 'queueing',
         enableRunButton: false,
-        taskId: Math.random().toString(36).substr(2),
       }
     case PROGRESS:
       return {
         ...state,
+        taskStatus: 'running',
         message: action.data.message,
         progress: action.data.progress,
       }
@@ -54,12 +63,14 @@ export default function reducer(state:ITestLongTaskStoreState  = {
     case FINISH_TASK:
       return {
         ...state,
+        taskStatus: 'finish',
         message:'finish long task',
         enableRunButton: true,
       }
     case ABORT_TASK:
       return {
         ...state,
+        taskStatus: 'aborted',
         message: 'aborted',
         enableRunButton: true,
       }

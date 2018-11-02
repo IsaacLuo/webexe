@@ -31,8 +31,9 @@ export default function reducer(state:IMergeLightCyclerReportsStoreState  = {
   mergedResultFileRefs: [],
   message: '',
   progress: 0,
+  taskStatus: 'init',
   showProgressBar: false,
-  taskId: '',
+  clientId: '',
   enableRunButton: true,
 }, action: IAction) {
   switch (action.type) {
@@ -46,7 +47,7 @@ export default function reducer(state:IMergeLightCyclerReportsStoreState  = {
       return {
         ...state,
         enableRunButton: false,
-        taskId: Math.random().toString(36).substr(2),
+        clientId: Math.random().toString(36).substr(2),
         progress:0,
         showProgressBar:true,
       }
