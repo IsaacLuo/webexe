@@ -103,7 +103,7 @@ function* onWebsocketDisconnected() {
 }
 
 export default function* watchMergeLightCyclerReport() {
-  yield takeEvery(CREATE_WS, createWebSocket);
+  yield takeLatest(CREATE_WS, createWebSocket);
   yield takeLatest(WS_DISCONNECTED, onWebsocketDisconnected);
-  yield takeEvery(HEARTBEAT, heartBeat);
+  yield takeLatest(HEARTBEAT, heartBeat);
 }

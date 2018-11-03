@@ -2,7 +2,12 @@ const TASK_APPENDIX = '_MLCR'
 
 // user starts the task
 export const CREATE_WS = 'CREATE_WS' + TASK_APPENDIX;
+
+// set ws to store
 export const SET_WS = 'SET_WS' + TASK_APPENDIX;
+
+// websocket disconnected
+export const END_WS = 'END_WS' + TASK_APPENDIX;
 
 // websocket disconnected
 export const WS_DISCONNECTED = 'WS_DISCONNECTED' + TASK_APPENDIX;
