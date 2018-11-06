@@ -51,7 +51,7 @@ interface IProps {
   progress: 0,
   showProgressBar: boolean,
   ws?: WebSocket,
-  taskId: string,
+  clientId: string,
   enableRunButton: boolean,
   uploadPlateDefinitionFile: (file:File) => void,
   uploadLightCyclerReportFile: (file:File) => void,

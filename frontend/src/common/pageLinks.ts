@@ -15,8 +15,7 @@ export default [
     link: '/tools/TestLongTask',
     component: TestLongTask,
   },
-
-    {
+  {
     title: 'task manager',
     discription: 'task manager',
     link: '/tools/TaskManager',
