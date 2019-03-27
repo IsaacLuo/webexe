@@ -1,3 +1,6 @@
+/**
+ * @file MergeLightCyclerReport sagas
+ */
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
 import config from '../../config'
 import uploadFile from '../../common/uploadFile'

@@ -11,19 +11,16 @@ import {
 import{
   UPLOADED_PLATE_DEFINITION_FILE,
   UPLOADED_LIGHT_CYCLER_REPORT_FILE,
-  REPORT_GENERATED_MLCR,
   RESET_MLCR,
   SERVER_MESSAGE,
   PROGRESS,
   FINISH_TASK,
   ABORT_TASK,
-  CREATE_WS,
   START_TASK,
   SET_WS,
   SERVER_RESULT,
+  SET_CLIENT_ID,
 } from './actions'
-
-import config from '../../config'
 
 export default function reducer(state:IMergeLightCyclerReportsStoreState  = {
   plateDefinitionFileRefs: [],
@@ -33,28 +30,33 @@ export default function reducer(state:IMergeLightCyclerReportsStoreState  = {
   progress: 0,
   taskStatus: 'init',
   showProgressBar: false,
-  clientId: '',
+  clientId: 'no client id',
   enableRunButton: true,
 }, action: IAction) {
   switch (action.type) {
     case SET_WS:
       return {
         ...state,
+        taskStatus: 'ready',
         ws: action.data,
       }
-    
+    case SET_CLIENT_ID:
+      return {
+        ...state,
+        clientId: action.data,
+      }
     case START_TASK:
       return {
         ...state,
+        taskStatus: 'queueing',
         enableRunButton: false,
-        clientId: Math.random().toString(36).substr(2),
         progress:0,
         showProgressBar:true,
       }
-
     case PROGRESS:
       return {
         ...state,
+        taskStatus: 'running',
         message: action.data.message,
         progress: action.data.progress,
         showProgressBar: true,
@@ -73,6 +75,7 @@ export default function reducer(state:IMergeLightCyclerReportsStoreState  = {
     case FINISH_TASK:
       return {
         ...state,
+        taskStatus: 'finish',
         message:'finish',
         enableRunButton: true,
         progress: 100,
@@ -80,6 +83,7 @@ export default function reducer(state:IMergeLightCyclerReportsStoreState  = {
     case ABORT_TASK:
       return {
         ...state,
+        taskStatus: 'aborted',
         message: 'aborted',
         enableRunButton: true,
       }
