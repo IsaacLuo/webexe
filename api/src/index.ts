@@ -6,7 +6,16 @@ import Router from 'koa-router';
 import log4js from 'log4js';
 import cors from 'koa2-cors';
 import taskDescriptions from './taskDescriptions'
+import uuid from 'uuid'
+// import redis from 'redis'
 
+
+// const redisClient = redis.createClient(6379, '127.0.0.1');
+// redisClient.on('error', err => {
+//   console.log('Error ' + err);
+// });
+
+global.tasks = {};  
 
 const GUEST_ID = '000000000000000000000000';
 
@@ -80,11 +89,29 @@ async (ctx:Ctx, next:Next)=> {
 router.post('/api/task/:taskName',
 // userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
-  if (taskDescriptions[ctx.params.taskName]) {
-    ctx.body = taskDescriptions[ctx.params.taskName];
+  const taskName = ctx.params.taskName;
+  if (taskDescriptions[taskName]) {
+    ctx.body = taskDescriptions[taskName];
   } else {
     ctx.throw(404, 'no this task');
   }
+  let taskId;
+  do {
+    taskId = uuid.v4();
+  } while(global.tasks[taskId]!==undefined);
+  // redisClient.sadd(taskName, taskId);
+  // redisClient.hmset(taskId, {
+  //   status: 'running',
+  // });
+  
+  global.tasks[taskId] = {
+    name: taskName,
+    status: 'running',
+  }
+
+  // run task
+  
+
 });
 
 // -----------------------------------------------------------------------------------------------
