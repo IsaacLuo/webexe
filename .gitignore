@@ -1,1 +1,3 @@
 /.vscode
+/api/logs
+/api/secret.ts
