@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 // react-redux-router
-import { IStoreState } from '../../types'
+import { IStoreState, TaskDefinition } from '../../types'
 import { withRouter, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
@@ -41,15 +41,17 @@ const RoundButton = styled(Button)`
 `
 
 interface IProps {
+  availableTasks: TaskDefinition[],
 }
 interface IState {
 }
 class Dashboard extends React.Component<IProps, IState> {
   public render () {
-    const appBlocks = pageLinks.map(item => <DashboardItem key={item.link}>
-          <DashboardItemTitle>{item.title}</DashboardItemTitle>
-          <p>{item.discription}</p>
-          <Link to={item.link}><RoundButton type="primary">start</RoundButton></Link>
+    
+    const appBlocks = this.props.availableTasks.map(item => <DashboardItem key={item.name}>
+          <DashboardItemTitle>{item.name}</DashboardItemTitle>
+          <p>{item.description}</p>
+          <Link to={`/task/${item.name}`}><RoundButton type="primary">start</RoundButton></Link>
         </DashboardItem>)
     return (
       <DashboardPanel>
@@ -62,7 +64,7 @@ class Dashboard extends React.Component<IProps, IState> {
 }
 
 const mapStateToProps = (state: IStoreState) => ({
-
+  availableTasks: state.app.availableTasks,
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({

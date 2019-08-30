@@ -1,11 +1,12 @@
 import * as childProcess from 'child_process'
+import { IProcess } from './types';
 
 const readline = require('readline');
 
-export function runPython (params: string[], dataIn?: any, onOutput?: (outputObj:any, stdin?:any)=>void, onStdErr?: (message: string)=>void) {
+export function runExe (process: IProcess, dataIn?: any, onOutput?: (outputObj:any, stdin?:any)=>void, onStdErr?: (message: string)=>void) {
   return new Promise((resolve, reject)=>{
-    console.debug('start python', params);
-    const subProcess = childProcess.spawn('python', params);
+    console.debug('start python', process.params);
+    const subProcess = childProcess.spawn(process.program, process.params);
     const rl = readline.createInterface({
       input: subProcess.stdout,
     });
@@ -18,7 +19,6 @@ export function runPython (params: string[], dataIn?: any, onOutput?: (outputObj
       if(onOutput) {
         onOutput(messageObj, subProcess.stdin);
       }
-      // allObjects.push(messageObj);
     })
 
     subProcess.stderr.on('data', (data) => {

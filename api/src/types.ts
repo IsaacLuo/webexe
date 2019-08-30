@@ -1,3 +1,5 @@
+import * as ws from 'ws';
+
 export interface IGLobalConfig {
   maxTubeDeleteLimit: number,
   host: string,
@@ -27,4 +29,21 @@ export interface IUser extends IUserEssential {
 export interface ICustomState {
   user?: ITokenContent,
   data?: any,
+}
+
+export interface IProcess {
+  processId: string;
+  program: string;
+  params: string[];
+  taskName: string;
+  state: 'ready'| 'running' | 'done' | 'error';
+  webSockets: Set<ws>;
+  result: any;
+  createdAt?: Date;
+  startedAt?: Date;
+  doneAt?: Date;
+}
+
+export interface IProcessDict {
+  [key: string]: IProcess;
 }

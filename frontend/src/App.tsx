@@ -1,4 +1,4 @@
-import {IStoreState} from './types'
+import {IStoreState, TaskDefinition} from './types'
 // react-redux-router
 import * as React from 'react'
 import { Dispatch } from 'redux'
@@ -23,14 +23,16 @@ import config from './config';
 
 import pageLinks from './common/pageLinks'
 import {
-  TEST_CONNECTION
+  TEST_CONNECTION, GET_AVAILABLE_TASKS
 } from './actions'
 import TaskManager from './pages/TaskManager';
 
 interface IProps {
   message:string,
   messageStyle:string,
+  dispatchGetAvailabTasks:()=>void,
   testConnection:()=>void,
+  availableTasks: TaskDefinition[],
 }
 
 interface IState {
@@ -48,18 +50,22 @@ class App extends React.Component<IProps, IState> {
   constructor(props:IProps) {
     super(props);
     this.props.testConnection();
+    this.props.dispatchGetAvailabTasks();
   }
 
   public render() {
-    const {message, messageStyle} = this.props;
+    const {message, messageStyle, availableTasks} = this.props;
     return (
       <div className="App">
         <NavBar/>
         <main>
           <MyPanel>
             <Route path='/' exact={true} component={Dashboard} />
-            {
-              pageLinks.map(item=><Route key={item.link} path={item.link} exact={true} component={item.component} />)
+            {availableTasks &&
+              availableTasks.map(
+                item=>
+                  <Route key={item.name} path={`/task/${item.name}`} exact={true} component={TestLongTask} 
+                />)
             }
             <p className={`message-bar ${messageStyle}`}>{message}</p>
           </MyPanel>
@@ -74,10 +80,12 @@ class App extends React.Component<IProps, IState> {
 const mapStateToProps = (state :IStoreState) => ({
   message: state.app.message,
   messageStyle: state.app.messageStyle,
+  availableTasks: state.app.availableTasks,
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({
-  testConnection: ()=>dispatch({type:TEST_CONNECTION})
+  testConnection: ()=>dispatch({type:TEST_CONNECTION}),
+  dispatchGetAvailabTasks: ()=>dispatch({type:GET_AVAILABLE_TASKS})
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App))

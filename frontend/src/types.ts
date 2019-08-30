@@ -11,9 +11,16 @@ export interface IFileUploadAction extends IAction{
   }
 }
 
+export interface TaskDefinition {
+  name:string;
+  description: string;
+  params: any;
+}
+
 export interface IAppStoreState {
   message: string,
   messageStyle: string,
+  availableTasks: TaskDefinition[],
 }
 
 export interface INamedLink {

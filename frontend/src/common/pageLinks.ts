@@ -1,6 +1,6 @@
-import MergeLightCyclerReport from "src/pages/MergeLightCyclerReport";
-import TestLongTask from "src/pages/TestLongTask";
-import TaskManager from 'src/pages/TaskManager';
+import MergeLightCyclerReport from "../pages/MergeLightCyclerReport";
+import TestLongTask from "../pages/TestLongTask";
+import TaskManager from '../pages/TaskManager';
 
 export default [
   {

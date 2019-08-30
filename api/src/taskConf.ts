@@ -1,5 +1,6 @@
 export default {
   test: {
-    script: ['python3', 'test_long_task.py', '{{durantion}}']
+    program: 'python3',
+    params: ['scripts/test_long_task.py'],
   }
 }
