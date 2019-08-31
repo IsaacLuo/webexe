@@ -17,7 +17,7 @@ import NavBar from './components/NavBar'
 import FootBar from './components/FootBar'
 import Dashboard from './pages/Dashboard'
 import MergeLightCyclerReport from './pages/MergeLightCyclerReport'
-import TestLongTask from './pages/TestLongTask'
+import GeneralTask from './pages/GeneralTask'
 
 import config from './config';
 
@@ -32,7 +32,7 @@ interface IProps {
   messageStyle:string,
   dispatchGetAvailabTasks:()=>void,
   testConnection:()=>void,
-  availableTasks: TaskDefinition[],
+  availableTasks: {[key:string]:TaskDefinition},
 }
 
 interface IState {
@@ -62,9 +62,14 @@ class App extends React.Component<IProps, IState> {
           <MyPanel>
             <Route path='/' exact={true} component={Dashboard} />
             {availableTasks &&
-              availableTasks.map(
-                item=>
-                  <Route key={item.name} path={`/task/${item.name}`} exact={true} component={TestLongTask} 
+              Object.keys(availableTasks).map(
+                (key,i)=>
+                  <Route 
+                    key={i} 
+                    path={`/task/${availableTasks[key].name}`} 
+                    exact={true} 
+                    component={() => <GeneralTask taskName={availableTasks[key].name} 
+                  />} 
                 />)
             }
             <p className={`message-bar ${messageStyle}`}>{message}</p>

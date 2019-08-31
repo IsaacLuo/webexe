@@ -41,17 +41,17 @@ const RoundButton = styled(Button)`
 `
 
 interface IProps {
-  availableTasks: TaskDefinition[],
+  availableTasks: {[key:string]:TaskDefinition},
 }
 interface IState {
 }
 class Dashboard extends React.Component<IProps, IState> {
   public render () {
     
-    const appBlocks = this.props.availableTasks.map(item => <DashboardItem key={item.name}>
-          <DashboardItemTitle>{item.name}</DashboardItemTitle>
-          <p>{item.description}</p>
-          <Link to={`/task/${item.name}`}><RoundButton type="primary">start</RoundButton></Link>
+    const appBlocks = Object.keys(this.props.availableTasks).map(item => <DashboardItem key={this.props.availableTasks[item].name}>
+          <DashboardItemTitle>{this.props.availableTasks[item].name}</DashboardItemTitle>
+          <p>{this.props.availableTasks[item].description}</p>
+          <Link to={`/task/${this.props.availableTasks[item].name}`}><RoundButton type="primary">start</RoundButton></Link>
         </DashboardItem>)
     return (
       <DashboardPanel>

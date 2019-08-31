@@ -89,8 +89,9 @@ router.get('/api/user/current', async (ctx:Ctx, next:Next)=> {
 router.get('/api/tasks/',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
-  const taskKeys = Object.keys(taskDescriptions);
-  ctx.body = taskKeys.map(key=>taskDescriptions[key]);
+  // const taskKeys = Object.keys(taskDescriptions);
+  // ctx.body = taskKeys.map(key=>taskDescriptions[key]);
+  ctx.body = taskDescriptions;
 });
 
 
@@ -124,8 +125,8 @@ async (ctx:Ctx, next:Next)=> {
   
   global.tasks[processId] = {
     processId,
-    program: taskConf[taskName],
-    params: taskConf[taskName],
+    program: taskConf[taskName].program,
+    params: taskConf[taskName].params,
     taskName,
     state: 'ready',
     webSockets:new Set(),
@@ -156,6 +157,12 @@ async (ctx:Ctx, next:Next)=> {
       delete global.tasks[processId];
     }
   });
+}
+);
+
+router.get('/api/processes/',
+async (ctx:Ctx, next:Next)=> {
+  ctx.body = global.tasks;
 }
 );
 
@@ -191,16 +198,16 @@ app.ws.use(Route.all('/ws/test', (ctx)=>{
 })
 }));
 
-const process:IProcess = {
-  processId: '123',
-  program: taskConf['test'].program,
-  params: taskConf['test'].params,
-  taskName: 'test',
-  state: 'ready',
-  webSockets:new Set(),
-  result: undefined,
-}
-global.tasks['123'] = process;
+// const process:IProcess = {
+//   processId: '123',
+//   program: taskConf['test'].program,
+//   params: taskConf['test'].params,
+//   taskName: 'test',
+//   state: 'ready',
+//   webSockets:new Set(),
+//   result: undefined,
+// }
+// global.tasks['123'] = process;
 
 function sendToAllClient(processId:string, object:any) {
   const process = global.tasks[processId];
@@ -240,6 +247,7 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
         process.state = 'running';
         sendToAllClient(id, {type:'processState', message:'running'});
         process.startedAt = new Date();
+        console.log(process);
         const result = await runExe(
           process,
           null,
@@ -264,6 +272,7 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
         process.webSockets.forEach(ws => {if (ws.readyState === ws.CLOSED) process.webSockets.delete(ws)});
       } catch (err) {
         process.state = 'error';
+        console.error(err);
         sendToAllClient(id, {type:'processState', message:'error'});
         ctx.websocket.close();
         process.doneAt = new Date();

@@ -20,7 +20,7 @@ export interface TaskDefinition {
 export interface IAppStoreState {
   message: string,
   messageStyle: string,
-  availableTasks: TaskDefinition[],
+  availableTasks: {[key:string]:TaskDefinition},
 }
 
 export interface INamedLink {
@@ -29,7 +29,20 @@ export interface INamedLink {
   link:string,
 }
 
-export type TaskStatus = 'init'|'ready'|'queueing'|'running'|'finish'|'aborted';
+// export type TaskStatus = 'init'|'ready'|'queueing'|'running'|'finish'|'aborted';
+export type TaskStatus = string;
+
+export interface IGeneralTaskState {
+  message: string,
+  progress: 0,
+  taskStatus: TaskStatus,
+  showProgressBar: boolean,
+  ws?: WebSocket,
+  clientId: string,
+  enableRunButton: boolean,
+
+  processId?: string;
+}
 
 export interface IMergeLightCyclerReportsStoreState {
   message: string,
@@ -72,6 +85,7 @@ export interface ITaskManagerStoreState {
 
 export interface IStoreState {
   app: IAppStoreState,
+  generalTask: IGeneralTaskState,
   mergeLightCyclerReport:IMergeLightCyclerReportsStoreState,
   testLongTask:ITestLongTaskStoreState,
   taskManager:ITaskManagerStoreState,
