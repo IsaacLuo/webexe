@@ -44,6 +44,32 @@ function* heartBeat(action: IAction) {
 }
 
 
+function initWebSocket(ws:WebSocket) {
+  return eventChannel( emitter => {
+    ws.onmessage = event => {
+      console.debug('server ws: '+ event.data);
+      try {
+        const serverAction = JSON.parse(event.data);
+        emitter(serverAction);
+      } catch (err) {
+        console.error(event.data);
+      }
+    }
+    ws.onopen = () => {
+      console.log('websocket open');
+    }
+
+    ws.onclose = () => {
+      console.log('websocket closed');
+      emitter({type:WS_DISCONNECTED});
+    }
+
+    return () => {
+      console.log('Socket off')
+    }
+  });
+}
+
 function* startTask(action:IAction) {
   const pageState:IGeneralTaskState = yield select((state:IStoreState) =>state.generalTask);
   console.log('starting new task ', action.data);
@@ -55,32 +81,65 @@ function* startTask(action:IAction) {
 
     // 2. create websocket to receive progress
     const webSocket = new WebSocket(`${config.pythonServerURL}/ws/process/${processId}`);
+    const channel = yield call(initWebSocket, webSocket);
     yield put({type:SET_WS, data: webSocket});
-    webSocket.onmessage = function (evt) {
-        console.log("服务端说" + evt.data)
-    }
-    webSocket.onclose = function (evt) {
-        console.log("Connection closed.")
+    // yield put({type:HEARTBEAT, data:webSocket});
+    while (true) {
+      const serverAction = yield take(channel)
+      switch (serverAction.type) {
+        case 'initialize':
+          yield put({
+              type: SET_CLIENT_ID,
+              data: serverAction.data.clientId,
+            });
+            break;
+        case 'prompt':
+          yield put({
+              type: PROGRESS,
+              data: {message: 'started', progress:0},
+            });
+            break;
+        case 'queueing':
+          yield put({
+            type: SERVER_MESSAGE,
+            data: {message: serverAction.message},
+          });
+          break;
+        case 'progress':
+          yield put({
+            type: PROGRESS,
+            data: {message: serverAction.message, progress:Math.ceil(serverAction.progress*100)},
+          });
+          break;
+        case 'result':
+          yield put({
+            type: SERVER_RESULT,
+            data: {},
+          });
+          break;
+        case 'finish':
+          yield put({
+            type: FINISH_TASK,
+          });
+          break;
+        case 'rejected':
+          yield put({
+            type: REJECT_TASK,
+            data: {message: serverAction.message},
+          });
+          break;
+        case 'message':
+          yield put({
+            type: SERVER_MESSAGE,
+            data: {message: serverAction.message},
+          });
+          break;
+      }
     }
   } catch (err) {
 
   }
-  const {
-    ws,
-    clientId,
-    } = pageState;
-  if (ws && ws.readyState === 1) {
-    ws.send(JSON.stringify({
-      type:'requestToStart', 
-      data:{
-        clientId,
-        params: {},
-      }
-    }));
-  } else {
-    console.warn('ws wrong', ws, ws?ws.readyState:undefined);
-    yield put({type:WS_DISCONNECTED});
-  }
+
 }
 
 function* onWebsocketDisconnected() {
