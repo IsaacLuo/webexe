@@ -32,6 +32,11 @@ export interface INamedLink {
 // export type TaskStatus = 'init'|'ready'|'queueing'|'running'|'finish'|'aborted';
 export type TaskStatus = string;
 
+export interface IServerLog {
+  time: Date,
+  text: string,
+}
+
 export interface IGeneralTaskState {
   message: string,
   progress: 0,
@@ -42,6 +47,9 @@ export interface IGeneralTaskState {
   enableRunButton: boolean,
 
   processId?: string;
+  signalLog: IServerLog[];
+  outputLog: IServerLog[];
+  result: any;
 }
 
 export interface IMergeLightCyclerReportsStoreState {

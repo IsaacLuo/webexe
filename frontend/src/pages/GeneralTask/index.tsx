@@ -1,15 +1,13 @@
 import * as React from 'react'
 
 // react-redux-router
-import { IStoreState, INamedLink, TaskStatus, TaskDefinition } from '../../types'
+import { IStoreState, INamedLink, TaskStatus, TaskDefinition, IServerLog } from '../../types'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 import {
   START_TASK,
   ABORT_TASK,
-  CREATE_WS,
-  END_WS,
 } from './actions';
 
 // other tools
@@ -18,11 +16,23 @@ import {Button, Progress, InputNumber} from 'element-react'
 import ProgressMonitorPanel from '../../components/ProgressMonitorPanel'
 
 const MyPanel = styled.div`
-  width:800px;
+  // width:800px;
   display:flex;
   flex-direction: column;
   align-items: center;
 `;
+
+const CodePanel = styled.div`
+  border: solid 1px black;
+  background: #ddd;
+  width: 400px;
+  height: 400px;
+  text-align: left;
+  padding: 8px;
+  display:inline-block;
+  word-wrap: break-word;
+  overflow-y: scroll;
+`
 
 interface IProps {
   availableTasks: {[key:string]:TaskDefinition};
@@ -30,15 +40,18 @@ interface IProps {
 
   message: string,
   progress: number,
+  signalLog: IServerLog[],
+  outputLog: IServerLog[],
+  processId?: string,
+  result: any,
+
   taskStatus: TaskStatus,
   showProgressBar: boolean,
   ws?: WebSocket,
   enableRunButton: boolean,
-  clientId: string,
-  initialWebSocket: ()=>void,
-  finalizeWebSocket: (ws:WebSocket)=>void,
-  start: (taskName:string)=>void,
-  abort: ()=>void,
+
+  start: (taskName:string, params:any)=>void,
+  abort: (processId:string)=>void,
 }
 interface IState {
   taskDefinition?: TaskDefinition;
@@ -47,21 +60,22 @@ interface IState {
 
 const mapStateToProps = (state: IStoreState) => ({
   availableTasks: state.app.availableTasks,
-
   message: state.generalTask.message,
   progress: state.generalTask.progress,
+  signalLog: state.generalTask.signalLog,
+  outputLog: state.generalTask.outputLog,
+  processId: state.generalTask.processId,
+  result: state.generalTask.result,
+
   taskStatus: state.generalTask.taskStatus,
   showProgressBar: state.generalTask.showProgressBar,
   ws: state.generalTask.ws,
   enableRunButton: state.generalTask.enableRunButton,
-  clientId: state.generalTask.clientId,
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({
-  start: (taskName:string) => dispatch({type: START_TASK, data:taskName}),
-  abort: () => dispatch({type: ABORT_TASK, data:{message:''}}),
-  initialWebSocket: () => dispatch({type: CREATE_WS}),
-  finalizeWebSocket: (ws) => dispatch({type: END_WS}),
+  start: (taskName:string, params:any) => dispatch({type: START_TASK, data:{taskName, params}}),
+  abort: (processId:string) => dispatch({type: ABORT_TASK, data:processId}),
 })
 
 class GeneralTask extends React.Component<IProps, IState> {
@@ -83,11 +97,9 @@ class GeneralTask extends React.Component<IProps, IState> {
   public render() {
     const {
       message,
-      start,
       progress,
       showProgressBar,
       enableRunButton,
-      clientId,
     } = this.props;
 
     const {taskDefinition} = this.state;
@@ -101,7 +113,7 @@ class GeneralTask extends React.Component<IProps, IState> {
         <div>
           <Button
             type="primary"
-            onClick={start.bind(this, this.props.taskName)}
+            onClick={this.startTask}
             style={{width:200}}
             disabled={!enableRunButton}
             >
@@ -119,7 +131,16 @@ class GeneralTask extends React.Component<IProps, IState> {
           showProgressBar={showProgressBar}
           message={message}
         />
-        <div>{clientId}</div>
+        <div style={{width:'100%'}}>
+        <CodePanel>
+          {this.props.signalLog.map((v,i)=><div key={i}>{`${v.time.getHours()}:${v.time.getMinutes()}:${v.time.getSeconds()}`}: {v.text}</div>)}
+        </CodePanel>
+        <CodePanel>
+          {this.props.outputLog.map((v,i)=><div key={i}>{v.text}</div>)}
+        </CodePanel>
+        </div>
+        {this.props.result ? <h3>results</h3> : <div>-----</div>}
+        {this.generateResults()}
       </MyPanel>
     );
     } else {
@@ -147,6 +168,20 @@ class GeneralTask extends React.Component<IProps, IState> {
     )
   }
 
+  private generateResults = () => {
+    const {result} = this.props;
+    let comps:any[] = [];
+    if (result) {
+      if (result.files) {
+        comps = [...comps, result.files.map((v,i)=>
+        <div key={i}>
+          <a href={v.data} download={v.name}>{v.name}</a>
+        </div>)]
+      }
+    }
+    return comps;
+  }
+
   private generateContol = (type:string, settings:any, value:any, onChange:(value:any)=>void) => {
     switch (type) {
       case 'numeric':
@@ -162,8 +197,15 @@ class GeneralTask extends React.Component<IProps, IState> {
     }
   }
 
+  private startTask = () => {
+    console.log(this.state.params);
+    this.props.start(this.props.taskName, this.state.params);
+  }
+
   private reset = () => {
-    this.props.abort();
+    if (this.props.processId) {
+      this.props.abort(this.props.processId);
+    }
   }
 }
 

@@ -109,24 +109,32 @@ router.post('/api/task/:taskName',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
   const taskName = ctx.params.taskName;
-  if (taskDescriptions[taskName]) {
-    ctx.body = taskDescriptions[taskName];
-  } else {
+  if (!taskDescriptions[taskName]) {
     ctx.throw(404, 'no this task');
   }
+  const {params} = ctx.request.body;
+  console.log(params);
+  const taskParams = [...taskConf[taskName].params];
+  for(const i in taskParams) {
+    const p = taskParams[i];
+    if(p[0] === '{' && p[p.length-1] === '}') {
+      // console.log(p.substr(1,p.length-2), params[p.substr(1,p.length-2)])
+      if (params[p.substr(1,p.length-2)]) {
+        // console.log(`${taskParams[i]} => ${params[p.substr(1,p.length-2)]}`);
+        taskParams[i] = `${params[p.substr(1,p.length-2)]}`
+      }
+    }
+  }
+  console.log('taskParams', taskParams);
   let processId;
   do {
     processId = uuid.v4();
   } while(global.tasks[processId]!==undefined);
-  // redisClient.sadd(taskName, taskId);
-  // redisClient.hmset(taskId, {
-  //   state: 'running',
-  // });
   
   global.tasks[processId] = {
     processId,
     program: taskConf[taskName].program,
-    params: taskConf[taskName].params,
+    params: taskParams,
     taskName,
     state: 'ready',
     webSockets:new Set(),
@@ -148,7 +156,7 @@ async (ctx:Ctx, next:Next)=> {
   processIds.forEach(processId => {
     const process = global.tasks[processId];
     if (process && process.createdAt && process.createdAt.getTime() < Date.now() - 3600000) {
-      sendToAllClient(processId, {type:'singnal', message:'timeout'});
+      sendToAllClient(processId, {type:'', message:'timeout'});
       process.webSockets.forEach(ws => {
         if (ws.readyState === ws.OPEN) {
           ws.close();
@@ -185,8 +193,26 @@ async (ctx:Ctx, next:Next)=> {
   } else {
     ctx.body = {result: process.result};
   }
-}
-);
+});
+
+router.delete('/api/process/:id',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const processId = ctx.params.id;
+  const process = global.tasks[processId];
+  // terminate process
+  if(process.subProcessInst) {
+    process.subProcessInst.kill();
+  }
+  sendToAllClient(processId, {type:'signal', message:'process aborted'});
+  process.webSockets.forEach(ws => {
+    if (ws.readyState === ws.OPEN) {
+      ws.close();
+    }
+  });
+  
+  delete global.tasks[processId];
+});
 
 //====================== websocket =======================
 
@@ -222,22 +248,22 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
   console.debug('processid=', id);
   const process = global.tasks[id];
     if (process){
-      ctx.websocket.send(JSON.stringify({type:'singnal', message:`socket open for task ${process.taskName}`}));
+      ctx.websocket.send(JSON.stringify({type:'signal', message:`socket open for task ${process.taskName}`}));
     } else {
       console.debug('no process');
-      ctx.websocket.send(JSON.stringify({type:'singnal', message:'process does not exist'}));
+      ctx.websocket.send(JSON.stringify({type:'signal', message:'process does not exist'}));
       ctx.websocket.close();
     }
     if (process.state === 'done') {
-      ctx.websocket.send(JSON.stringify({type:'singnal', message:'process already done'}));
+      ctx.websocket.send(JSON.stringify({type:'signal', message:'process already done'}));
       ctx.websocket.send(JSON.stringify({type:'processState', message:'done'}));
       ctx.websocket.close();
     } else if (process.state === 'error') {
-      ctx.websocket.send(JSON.stringify({type:'singnal', message:'process exited with an error'}));
+      ctx.websocket.send(JSON.stringify({type:'signal', message:'process exited with an error'}));
       ctx.websocket.send(JSON.stringify({type:'processState', message:'error'}));
       ctx.websocket.close();
     } else if (process.state === 'running') {
-      ctx.websocket.send(JSON.stringify({type:'singnal', message:'attached to socket'}));
+      ctx.websocket.send(JSON.stringify({type:'signal', message:'attached to socket'}));
       ctx.websocket.send(JSON.stringify({type:'processState', message:'running'}));
       process.webSockets.add(ctx.websocket);
     } else {
@@ -247,8 +273,8 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
         process.state = 'running';
         sendToAllClient(id, {type:'processState', message:'running'});
         process.startedAt = new Date();
-        console.log(process);
-        const result = await runExe(
+
+        const result = await runExe( //===================== run exe here
           process,
           null,
           (outputObj) => {
@@ -263,12 +289,18 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
               }
             })
             console.debug(`sent to ${count} client`);
+          },
+          (errMsg)=>{
+            console.error(errMsg);
+          },
+          (subProcessInst)=>{
+            process.subProcessInst = subProcessInst;
           }
         );
         process.state = 'done';
         process.doneAt = new Date();
         sendToAllClient(id, {type:'processState', message:'done'});
-        ctx.websocket.close();
+        process.webSockets.forEach(ws => {if (ws.readyState === ws.OPEN) ws.close()});
         process.webSockets.forEach(ws => {if (ws.readyState === ws.CLOSED) process.webSockets.delete(ws)});
       } catch (err) {
         process.state = 'error';

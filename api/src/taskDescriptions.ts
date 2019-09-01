@@ -4,14 +4,14 @@ export default {
     description: 'test is a test task which last X seconds and output some number',
     params: [
       {
-        name: 'durantion',
+        name: 'duration',
         control: 'numeric',
         controlSettings: {
-          min: 1000,
-          max: 60000,
-          step: 1000,
+          min: 1,
+          max: 60,
+          step: 1,
         },
-        default: 10000,
+        default: 10,
         essential: true,
       }
     ]

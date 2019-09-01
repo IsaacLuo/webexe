@@ -29,6 +29,8 @@ import{
   END_WS,
   SET_CLIENT_ID,
   SET_PROCESS_ID,
+  SET_PROCESS_SIGNAL,
+  SET_PROCESS_LOG,
 } from './actions'
 import Axios from 'axios';
 
@@ -72,10 +74,11 @@ function initWebSocket(ws:WebSocket) {
 
 function* startTask(action:IAction) {
   const pageState:IGeneralTaskState = yield select((state:IStoreState) =>state.generalTask);
-  console.log('starting new task ', action.data);
+  const {taskName, params} = action.data;
+  console.log('starting new task ', taskName);
   try {
     // 1. call API to create a task
-    const newTaskContent = yield call(Axios.post, `${config.backendURL}/api/task/${action.data}`, {}, {withCredentials: true});
+    const newTaskContent = yield call(Axios.post, `${config.backendURL}/api/task/${taskName}`, {params}, {withCredentials: true});
     const {processId} = newTaskContent.data;
     yield put({type:SET_PROCESS_ID, data:processId});
 
@@ -86,7 +89,44 @@ function* startTask(action:IAction) {
     // yield put({type:HEARTBEAT, data:webSocket});
     while (true) {
       const serverAction = yield take(channel)
+      console.debug('messageType', serverAction.type)
       switch (serverAction.type) {
+        case 'signal':
+          yield put({
+            type: SET_PROCESS_SIGNAL,
+            data: serverAction.message,
+          });
+          break;
+
+        case 'progress':
+            yield put({
+              type: PROGRESS,
+              data: {message: serverAction.message, progress:Math.ceil(serverAction.progress*100)},
+            });
+            yield put({
+              type: SET_PROCESS_SIGNAL,
+              data: serverAction.message,
+            });
+            break;
+
+        case 'log':
+            yield put({
+              type: SET_PROCESS_LOG,
+              data: serverAction.message,
+            });
+            break;
+
+        case 'result':
+            yield put({
+              type: SERVER_RESULT,
+              data: serverAction.data,
+            });
+            yield put({
+              type: SET_PROCESS_LOG,
+              data: serverAction.message,
+            });
+            break;
+
         case 'initialize':
           yield put({
               type: SET_CLIENT_ID,
@@ -98,25 +138,15 @@ function* startTask(action:IAction) {
               type: PROGRESS,
               data: {message: 'started', progress:0},
             });
-            break;
+          break;
         case 'queueing':
           yield put({
             type: SERVER_MESSAGE,
             data: {message: serverAction.message},
           });
           break;
-        case 'progress':
-          yield put({
-            type: PROGRESS,
-            data: {message: serverAction.message, progress:Math.ceil(serverAction.progress*100)},
-          });
-          break;
-        case 'result':
-          yield put({
-            type: SERVER_RESULT,
-            data: {},
-          });
-          break;
+        
+
         case 'finish':
           yield put({
             type: FINISH_TASK,
@@ -149,9 +179,10 @@ function* onWebsocketDisconnected() {
 }
 
 function* abortTask(action:IAction) {
-  const {ws,clientId} = yield select((state:IStoreState) =>state.testLongTask);
-  if (ws && ws.readyState === 1) {
-    ws.send(JSON.stringify({type:'abortTask', data:{clientId}}));
+  try {
+    yield call(Axios.delete, `${config.backendURL}/api/process/${action.data}`, {withCredentials: true});
+  } catch (err) {
+
   }
   return;
 }

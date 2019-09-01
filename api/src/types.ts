@@ -1,4 +1,5 @@
 import * as ws from 'ws';
+import { ChildProcess, ChildProcessWithoutNullStreams } from 'child_process';
 
 export interface IGLobalConfig {
   maxTubeDeleteLimit: number,
@@ -33,6 +34,7 @@ export interface ICustomState {
 
 export interface IProcess {
   processId: string;
+  subProcessInst?: ChildProcessWithoutNullStreams;
   program: string;
   params: string[];
   taskName: string;

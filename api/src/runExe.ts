@@ -3,10 +3,19 @@ import { IProcess } from './types';
 
 const readline = require('readline');
 
-export function runExe (process: IProcess, dataIn?: any, onOutput?: (outputObj:any, stdin?:any)=>void, onStdErr?: (message: string)=>void) {
+export function runExe (
+  process: IProcess, 
+  dataIn?: any, 
+  onOutput?: (outputObj:any, stdin?:any)=>void, 
+  onStdErr?: (message: string)=>void,
+  onProcessCreated?: (instance:childProcess.ChildProcessWithoutNullStreams)=>void,
+  ) {
   return new Promise((resolve, reject)=>{
     console.debug('start',process.program,  process.params);
     const subProcess = childProcess.spawn(process.program, process.params);
+    if (onProcessCreated) {
+      onProcessCreated(subProcess);
+    }
     const rl = readline.createInterface({
       input: subProcess.stdout,
     });
