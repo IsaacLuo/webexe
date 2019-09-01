@@ -1,1 +1,6 @@
 /.vscode
+/api/logs
+/api/secret.ts
+/api/scripts/__pycache__/*.pyc
+/api/results
+/api/uploads

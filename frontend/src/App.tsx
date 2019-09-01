@@ -1,4 +1,4 @@
-import {IStoreState} from './types'
+import {IStoreState, TaskDefinition} from './types'
 // react-redux-router
 import * as React from 'react'
 import { Dispatch } from 'redux'
@@ -16,21 +16,19 @@ import styled from 'styled-components'
 import NavBar from './components/NavBar'
 import FootBar from './components/FootBar'
 import Dashboard from './pages/Dashboard'
-import MergeLightCyclerReport from './pages/MergeLightCyclerReport'
-import TestLongTask from './pages/TestLongTask'
+import GeneralTask from './pages/GeneralTask'
 
-import config from './config';
-
-import pageLinks from './common/pageLinks'
 import {
-  TEST_CONNECTION
+  TEST_CONNECTION, GET_AVAILABLE_TASKS
 } from './actions'
 import TaskManager from './pages/TaskManager';
 
 interface IProps {
   message:string,
   messageStyle:string,
+  dispatchGetAvailabTasks:()=>void,
   testConnection:()=>void,
+  availableTasks: {[key:string]:TaskDefinition},
 }
 
 interface IState {
@@ -48,18 +46,27 @@ class App extends React.Component<IProps, IState> {
   constructor(props:IProps) {
     super(props);
     this.props.testConnection();
+    this.props.dispatchGetAvailabTasks();
   }
 
   public render() {
-    const {message, messageStyle} = this.props;
+    const {message, messageStyle, availableTasks} = this.props;
     return (
       <div className="App">
         <NavBar/>
         <main>
           <MyPanel>
             <Route path='/' exact={true} component={Dashboard} />
-            {
-              pageLinks.map(item=><Route key={item.link} path={item.link} exact={true} component={item.component} />)
+            {availableTasks &&
+              Object.keys(availableTasks).map(
+                (key,i)=>
+                  <Route 
+                    key={i} 
+                    path={`/task/${availableTasks[key].name}`} 
+                    exact={true} 
+                    component={() => <GeneralTask taskName={availableTasks[key].name} 
+                  />} 
+                />)
             }
             <p className={`message-bar ${messageStyle}`}>{message}</p>
           </MyPanel>
@@ -74,10 +81,12 @@ class App extends React.Component<IProps, IState> {
 const mapStateToProps = (state :IStoreState) => ({
   message: state.app.message,
   messageStyle: state.app.messageStyle,
+  availableTasks: state.app.availableTasks,
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({
-  testConnection: ()=>dispatch({type:TEST_CONNECTION})
+  testConnection: ()=>dispatch({type:TEST_CONNECTION}),
+  dispatchGetAvailabTasks: ()=>dispatch({type:GET_AVAILABLE_TASKS})
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App))

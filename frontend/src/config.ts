@@ -10,7 +10,7 @@ switch(process.env.NODE_ENV) {
         break;
     default:
         config = {
-            backendURL: 'http://localhost:8000',
+            backendURL: 'http://local.cailab.org:8000',
             pythonServerURL: 'ws://localhost:8000',
         }
 }

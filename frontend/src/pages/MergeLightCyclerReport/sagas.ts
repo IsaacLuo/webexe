@@ -4,7 +4,8 @@
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
 import config from '../../config'
 import uploadFile from '../../common/uploadFile'
-import { eventChannel, delay} from 'redux-saga'
+import { eventChannel} from 'redux-saga'
+import {delay} from 'redux-saga/effects'
 import {Notification} from 'element-react'
 
 import {
@@ -36,6 +37,7 @@ import{
   HEARTBEAT,
   
 } from './actions'
+import { UPLOAD_FILE_PARAMS } from 'pages/GeneralTask/actions';
 
 const wsURL = `${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`;
 
@@ -224,6 +226,9 @@ function* abortTask(action:IAction) {
 function* rejectTask(action:IAction) {
   yield call(Notification.error, action.data.message);
 }
+
+
+
 
 export default function* watchMergeLightCyclerReport() {
   yield takeEvery(UPLOAD_PLATE_DEFINITION_FILE, uploadPlateDefinitionFile);

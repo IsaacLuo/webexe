@@ -1,13 +1,14 @@
 import { combineReducers } from 'redux';
-import mergeLightCyclerReport from './pages/MergeLightCyclerReport/reducers'
-import testLongTask from './pages/TestLongTask/reducers'
-import taskManager from './pages/TaskManager/reducers'
+
 import { IAppStoreState, IAction } from './types';
 import config from './config'
+import { SET_AVAILABLE_TASKS } from './actions';
+import generalTask from './pages/GeneralTask/reducers';
 
 function app(state :IAppStoreState = {
   message: '',
   messageStyle: 'normal',
+  availableTasks: {},
 }, action: IAction) {
   switch (action.type) {
     case 'SHOW_CONNECTED':
@@ -22,15 +23,17 @@ function app(state :IAppStoreState = {
         message: `failed to connect ${config.backendURL}, please try again later`,
         messageStyle: 'error',
       }
+    case SET_AVAILABLE_TASKS:
+      return {
+        ...state,
+        availableTasks: action.data,
+      }
     default:
       return state;
   }
-  return state;
 }
 
 export default combineReducers({
   app,
-  mergeLightCyclerReport,
-  testLongTask,
-  taskManager,
+  generalTask,
 });
