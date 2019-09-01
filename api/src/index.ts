@@ -11,6 +11,14 @@ import taskDescriptions from './taskDescriptions'
 import uuid from 'uuid'
 import { runExe } from './runExe';
 import taskConf from './taskConf';
+import conf from '../conf';
+import path from 'path';
+import fs from 'fs';
+import mimetype from 'mime-types'
+const { promisify } = require('util');
+const fs_exists = promisify(fs.exists);
+const fs_mkdir = promisify(fs.mkdir);
+
 // import redis from 'redis'
 
 
@@ -36,7 +44,7 @@ type Ctx = koa.ParameterizedContext<ICustomState, {}>;
 type Next = ()=>Promise<any>;
 
 app.use(cors({credentials: true}));
-app.use(koaBody());
+app.use(koaBody({multipart:true}));
 middleware(app);
 
 function userMust (...args: Array<(ctx:koa.ParameterizedContext<any, {}>, next:()=>Promise<any>)=>boolean>) {
@@ -214,26 +222,54 @@ async (ctx:Ctx, next:Next)=> {
   delete global.tasks[processId];
 });
 
+router.post('/api/fileParam/',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  if (ctx.request.files === undefined) {
+    ctx.throw(404, 'no files');
+  }
+  const {file} = ctx.request.files;
+  const reader = fs.createReadStream(file.path);
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}_${now.getMonth()}_${now.getDate()}`
+  const exists = await fs_exists(`${conf.attachmentPath}/${todayStr}`);
+  const filePath = `${conf.attachmentPath}/${todayStr}/${Math.random().toString(36).substring(2)}_${file.name}`;
+  if (!exists) {
+    await fs_mkdir(`${conf.attachmentPath}/${todayStr}`);
+  }
+  const upStream = fs.createWriteStream(filePath);
+  reader.pipe(upStream);
+  ctx.body = {filePath,};
+});
+
+// router.get(/api\/fileParam\/(.+)\/as\/(.+)/,
+// userMust(beUser),
+// async (ctx:Ctx, next:Next)=> {
+//   const match = /api\/fileParam\/(.+)\/as\/(.+)/.exec(ctx.request.url);
+//   const filePath = match[1];
+//   const rename = match[2];
+//   if (await fs_exists(filePath)) {
+
+//   }
+//   ctx.body = {message:match};
+// });
+
+router.get('/api/resultFile/:fileName/as/:desiredName',
+userMust(beUser),
+async (ctx:Ctx, next:Next)=> {
+  const {fileName, desiredName} = ctx.params;
+  if (await fs_exists(`results/${fileName}`)) {
+    const mimeType = mimetype.lookup(fileName) || 'application/octet-stream';
+    ctx.set('Content-disposition', 'attachment; filename=' + desiredName);
+    ctx.set('Content-type', mimeType);
+    ctx.body = fs.createReadStream(`results/${fileName}`);
+  } else {
+    ctx.throw(404, 'no such result file');
+  }
+  
+});
+
 //====================== websocket =======================
-
-app.ws.use(Route.all('/ws/test', (ctx)=>{
-  ctx.websocket.send('test');
-  ctx.websocket.on('message', function (message) {
-    // 返回给前端的数据
-    ctx.websocket.send(message)
-})
-}));
-
-// const process:IProcess = {
-//   processId: '123',
-//   program: taskConf['test'].program,
-//   params: taskConf['test'].params,
-//   taskName: 'test',
-//   state: 'ready',
-//   webSockets:new Set(),
-//   result: undefined,
-// }
-// global.tasks['123'] = process;
 
 function sendToAllClient(processId:string, object:any) {
   const process = global.tasks[processId];

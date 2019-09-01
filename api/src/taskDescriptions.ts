@@ -16,5 +16,20 @@ export default {
       }
     ]
   },
-
+  crlf_to_lf: {
+    name: 'crlf_to_lf',
+    description: 'convert text files from CRLF to LF',
+    params: [
+      {
+        name: 'srcFileName',
+        control: 'file',
+        controlSettings: {
+          singleFile:true,
+          fileLimit: 100*1024*1024,
+        },
+        default: '',
+        essential: true,
+      }
+    ]
+  },
 }
