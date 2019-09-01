@@ -16,12 +16,8 @@ import styled from 'styled-components'
 import NavBar from './components/NavBar'
 import FootBar from './components/FootBar'
 import Dashboard from './pages/Dashboard'
-import MergeLightCyclerReport from './pages/MergeLightCyclerReport'
 import GeneralTask from './pages/GeneralTask'
 
-import config from './config';
-
-import pageLinks from './common/pageLinks'
 import {
   TEST_CONNECTION, GET_AVAILABLE_TASKS
 } from './actions'

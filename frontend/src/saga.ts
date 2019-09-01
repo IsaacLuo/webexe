@@ -3,7 +3,6 @@ import {delay} from 'redux-saga/effects'
 import {Notification} from 'element-react'
 import { IAction } from './types';
 import watchMergeLightCyclerReport from './pages/MergeLightCyclerReport/sagas'
-import watchTestLongTask from './pages/TestLongTask/sagas'
 import watchTaskManager from './pages/TaskManager/sagas'
 import watchGeneralTask from './pages/GeneralTask/sagas'
 
@@ -54,9 +53,8 @@ export default function* rootSaga() {
   yield all([
     fork(watchTaskDict),
     fork(watchSystemMessage),
-    fork(watchMergeLightCyclerReport),
-    fork(watchTestLongTask),
-    fork(watchTaskManager),
+    // fork(watchMergeLightCyclerReport),
+    // fork(watchTaskManager),
     fork(watchGeneralTask),
   ]);
 }

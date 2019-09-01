@@ -6,13 +6,7 @@ import { withRouter, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 import {Button} from 'element-react'
-
-import config from '../../config'
-
-import {Menu} from 'element-react'
 import styled from 'styled-components'
-
-import pageLinks from '../../common/pageLinks'
 
 const DashboardPanel = styled.div`
   width: 90%;

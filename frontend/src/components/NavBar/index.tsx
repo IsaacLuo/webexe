@@ -5,11 +5,8 @@ import { IStoreState } from '../../types'
 import { withRouter, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
-
-import config from '../../config'
-
 import {Menu} from 'element-react'
-import pageLinks from '../../common/pageLinks'
+
 
 
 interface IProps {
