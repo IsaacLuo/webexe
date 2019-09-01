@@ -27,9 +27,23 @@ export default {
           singleFile:true,
           fileLimit: 100*1024*1024,
         },
-        default: '',
         essential: true,
       }
     ]
   },
+  compress_pptx: {
+    name: 'compress_pptx',
+    description: 'comporess the media files in the pptx',
+    params: [
+      {
+        name: 'srcFileName',
+        control: 'file',
+        controlSettings: {
+          singleFile:true,
+          fileLimit: 1024*1024*1024,
+        },
+        essential: true,
+      }
+    ]
+  }
 }

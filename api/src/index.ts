@@ -327,7 +327,9 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
             console.debug(`sent to ${count} client`);
           },
           (errMsg)=>{
+            sendToAllClient(id, {type:'log', message:errMsg});
             console.error(errMsg);
+            
           },
           (subProcessInst)=>{
             process.subProcessInst = subProcessInst;

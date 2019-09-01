@@ -5,6 +5,10 @@ export default {
   },
   crlf_to_lf: {
     program: 'python3',
-    params: ['scripts/crlf_to_lf.py', '{srcFileName}', '{dstFileName}'],
+    params: ['scripts/crlf_to_lf.py', '{srcFileName}'],
   },
+  compress_pptx: {
+    program: 'python3',
+    params: ['scripts/py_ppt_comporess.py', '{srcFileName}'],
+  }
 }

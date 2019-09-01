@@ -133,20 +133,27 @@ class GeneralTask extends React.Component<IProps, IState> {
       enableRunButton,
     } = this.props;
 
-    const {taskDefinition} = this.state;
+    const {taskDefinition, params} = this.state;
+
     if(taskDefinition) {
       const form = this.generateParamsForm(taskDefinition);
+      
+      const paramMissing = taskDefinition.params.some((v:any)=>v.essential === true && params[v.name] === undefined)
+      console.log('testing params', taskDefinition.params, params, paramMissing)
     return (
       <MyPanel>
         <h1>{taskDefinition.name}</h1>
         <p>{taskDefinition.description}</p>
         {form}
+        {this.state.params && Object.keys(this.state.params).map((v,i)=><div key={i}>
+          {v} : {this.state.params[v]} 
+        </div>)}
         <div>
           <Button
             type="primary"
             onClick={this.startTask}
             style={{width:200}}
-            disabled={!enableRunButton}
+            disabled={paramMissing || !enableRunButton}
             >
             Run
           </Button>
@@ -192,6 +199,7 @@ class GeneralTask extends React.Component<IProps, IState> {
     return taskDefinition.params.map( (param, i) =>
       <div key={i}>
         <div>
+          {this.state.params[param.name] ? '✔️':'❌'}
           {param.name}
           {this.generateContol(param.control, param.controlSettings, params[param.name], this.onParamChange.bind(this, param.control, param.name))}
         </div>
