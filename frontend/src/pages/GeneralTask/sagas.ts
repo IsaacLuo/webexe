@@ -31,6 +31,7 @@ import{
   SET_PROCESS_ID,
   SET_PROCESS_SIGNAL,
   SET_PROCESS_LOG,
+  UPLOAD_FILE_PARAMS,
 } from './actions'
 import Axios from 'axios';
 
@@ -191,6 +192,14 @@ function* rejectTask(action:IAction) {
   yield call(Notification.error, action.data.message);
 }
 
+function* onUploadFileParams(action:IAction) {
+  try {
+    yield call(Axios.post, `${config.backendURL}/api/fileParam`, action.data, {withCredentials: true});
+  } catch (err) {
+
+  }
+}
+
 export default function* watchTestLongTask() {
   // yield takeLatest(CREATE_WS, createWebSocket);
   yield takeEvery(START_TASK, startTask);
@@ -199,5 +208,6 @@ export default function* watchTestLongTask() {
   // yield takeLatest(END_WS, endWebSocket);
   yield takeLatest(WS_DISCONNECTED, onWebsocketDisconnected);
   yield takeEvery(HEARTBEAT, heartBeat);
+  yield takeLatest(UPLOAD_FILE_PARAMS, onUploadFileParams);
   
 }

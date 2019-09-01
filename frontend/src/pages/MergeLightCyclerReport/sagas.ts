@@ -34,6 +34,7 @@ import{
   HEARTBEAT,
   
 } from './actions'
+import { UPLOAD_FILE_PARAMS } from 'pages/GeneralTask/actions';
 
 const wsURL = `${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`;
 
@@ -222,6 +223,9 @@ function* abortTask(action:IAction) {
 function* rejectTask(action:IAction) {
   yield call(Notification.error, action.data.message);
 }
+
+
+
 
 export default function* watchMergeLightCyclerReport() {
   yield takeEvery(UPLOAD_PLATE_DEFINITION_FILE, uploadPlateDefinitionFile);

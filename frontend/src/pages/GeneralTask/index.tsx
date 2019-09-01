@@ -8,12 +8,18 @@ import { Dispatch } from 'redux'
 import {
   START_TASK,
   ABORT_TASK,
+  UPLOAD_FILE_PARAMS,
 } from './actions';
 
 // other tools
 import styled from 'styled-components'
 import {Button, Progress, InputNumber} from 'element-react'
 import ProgressMonitorPanel from '../../components/ProgressMonitorPanel'
+import Dropzone, {useDropzone} from 'react-dropzone'
+import Axios from 'axios';
+import config from 'config';
+
+
 
 const MyPanel = styled.div`
   // width:800px;
@@ -34,6 +40,29 @@ const CodePanel = styled.div`
   overflow-y: scroll;
 `
 
+const MyDropzoneDiv = styled.div`
+  border-style: solid;
+  border-radius: 10px;
+  margin: 20px;
+  width: 80%;
+  padding: 20px;
+  min-height: 100px;
+  background: #dff;
+`
+// function MyDropzone() {
+//   const onDrop = useCallback(acceptedFiles => {
+//     // Do something with the files
+//   }, [])
+//   const {getRootProps, getInputProps} = useDropzone()
+
+//   return (
+//     <MyDropzoneDiv {...getRootProps()}>
+//       <input {...getInputProps()} />
+//       <p>Drag 'n' drop some files here, or click to select files</p>
+//     </MyDropzoneDiv>
+//   )
+// }
+
 interface IProps {
   availableTasks: {[key:string]:TaskDefinition};
   taskName: string,
@@ -52,6 +81,7 @@ interface IProps {
 
   start: (taskName:string, params:any)=>void,
   abort: (processId:string)=>void,
+  uploadFileParams: (paramsName:string, files:File[]) => void,
 }
 interface IState {
   taskDefinition?: TaskDefinition;
@@ -76,6 +106,7 @@ const mapStateToProps = (state: IStoreState) => ({
 const mapDispatchToProps = (dispatch :Dispatch) => ({
   start: (taskName:string, params:any) => dispatch({type: START_TASK, data:{taskName, params}}),
   abort: (processId:string) => dispatch({type: ABORT_TASK, data:processId}),
+  uploadFileParams: (paramsName:string, files:File[]) => dispatch({type: UPLOAD_FILE_PARAMS, data:{paramsName: files}}),
 })
 
 class GeneralTask extends React.Component<IProps, IState> {
@@ -162,7 +193,7 @@ class GeneralTask extends React.Component<IProps, IState> {
       <div key={i}>
         <div>
           {param.name}
-          {this.generateContol(param.control, param.controlSettings, params[param.name], (v:any)=>this.setState({params: {...params, [param.name]:v}}))}
+          {this.generateContol(param.control, param.controlSettings, params[param.name], this.onParamChange.bind(this, param.control, param.name))}
         </div>
       </div>
     )
@@ -175,7 +206,8 @@ class GeneralTask extends React.Component<IProps, IState> {
       if (result.files) {
         comps = [...comps, result.files.map((v,i)=>
         <div key={i}>
-          <a href={v.data} download={v.name}>{v.name}</a>
+          {v.data && <a href={v.data} download={v.name} target="_blank">{v.name}</a> }
+          {v.url && <a href={`${config.backendURL}/api/resultFile/${v.url}/as/${v.name}`} download={v.name} target="_blank">{v.name}</a> }
         </div>)]
       }
     }
@@ -192,9 +224,50 @@ class GeneralTask extends React.Component<IProps, IState> {
           max={settings.max} 
           step={settings.step}
           />
+      case 'file':
+        return <Dropzone onDrop={async (files:File[])=>{
+          const filePaths:string[] = [];
+          try {
+            for (const i in files) {
+              if (settings.singleFile && parseInt(i) > 0) {
+                break;
+              }
+              const file = files[i];
+              console.log(files);
+              const formData = new FormData();
+              formData.append('file', file)
+              const result = await Axios.post(
+                `${config.backendURL}/api/fileParam/`, 
+                formData, 
+                {headers: {'content-type': 'multipart/form-data'}, withCredentials:true});
+              const {filePath} = result.data;
+              if (filePath) {
+                filePaths.push(filePath);
+              }
+            }
+            onChange(filePaths);
+          } catch (err) {
+            console.error(err);
+          }
+        }}>
+        {({getRootProps, getInputProps}) => (
+          <section>
+            <MyDropzoneDiv {...getRootProps()}>
+              <input {...getInputProps()} />
+              <p>Drag 'n' drop some files here, or click to select files</p>
+            </MyDropzoneDiv>
+          </section>
+        )}
+      </Dropzone>
       default:
         return <div>unsupported control</div>
     }
+  }
+
+  private onParamChange = (controlType:any, paramName:string, value:any) => {
+    const {params} = this.state;
+    // console.log(controlType);
+    this.setState({params: {...params, [paramName]:value}});
   }
 
   private startTask = () => {
