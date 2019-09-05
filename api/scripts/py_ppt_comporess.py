@@ -19,7 +19,7 @@ else:
 def main(ppt_file_name, output_filename):
     webexe.log('prara {} {}'.format(ppt_file_name, output_filename))
     tmp_dir = os.path.abspath(conf.TMP_DIR)
-    tmp_dir = os.path.join(tmp_dir, ppt_file_name+'_'+datetime.datetime.now().strftime('%Y-%m-%d %H-%M-%S.%f'))
+    tmp_dir = os.path.join(tmp_dir, os.path.split(ppt_file_name)[1]+'_'+datetime.datetime.now().strftime('%Y%m%d%H%M%S.%f'))
     os.mkdir(tmp_dir)
     webexe.progress(message = 'extracting files', progress=0.1)
     with zipfile.ZipFile(ppt_file_name, 'r') as zip_ref:
@@ -42,16 +42,46 @@ def main(ppt_file_name, output_filename):
         webexe.progress(message = 'converting {}'.format(media_file_name), progress=0.2+file_count/total_files*0.6)
         webexe.log(media_file_name)
         fn1, fn2 = os.path.splitext(media_file_name)
-        fn2_dst = '.jpg' if fn2 == '.emf' else '.png'
-        webexe.log('"{}" "{}" "{}"'.format(
-            os.path.join(conf.IMAGE_MAGIC_DIR, 'convert'),
-            os.path.join(media_folder, media_file_name),
-            os.path.join(media_folder, fn1+fn2_dst)))
+        # fn2_dst = '.jpg' if fn2 == '.emf' else '.png'
+        # fn2_dst = '.png'
+        fn2_dst = '.jpg'
+        if fn2 == '.emf':
 
-        convert_result = subprocess.call('"{}" "{}" "{}"'.format(
-            os.path.join(conf.IMAGE_MAGIC_DIR, 'convert'),
-            os.path.join(media_folder, media_file_name),
-            os.path.join(media_folder, fn1+fn2_dst)))
+            convert_result = subprocess.call([
+                os.path.join(conf.IMAGE_MAGIC_DIR, 'unoconv'),
+                '-f',
+                'pdf',
+                '-o',
+                os.path.join(media_folder, fn1 + '.pdf'),
+                os.path.join(media_folder, media_file_name),
+                ])
+            
+            if convert_result == 0:
+                convert_result = subprocess.call([
+                    os.path.join(conf.IMAGE_MAGIC_DIR, 'pdfimages'),
+                    os.path.join(media_folder, fn1 + '.pdf'),
+                    os.path.join(media_folder, fn1 + '-ppm'),
+                    ])
+            if convert_result == 0:
+                convert_result = subprocess.call([
+                    os.path.join(conf.IMAGE_MAGIC_DIR, 'convert'),
+                    os.path.join(media_folder, fn1 + '-ppm-000.ppm'),
+                    os.path.join(media_folder, fn1+fn2_dst),
+                    ])
+
+            subprocess.call('rm {}'.format(os.path.join(media_folder, fn1 + '-ppm-*').replace(' ', '\ ')), shell=True)
+            subprocess.call('rm {}'.format(os.path.join(media_folder, fn1 + '.pdf').replace(' ', '\ ')), shell=True)
+
+        else:
+            webexe.log('"{}" "{}" "{}"'.format(
+                os.path.join(conf.IMAGE_MAGIC_DIR, 'convert'),
+                os.path.join(media_folder, media_file_name),
+                os.path.join(media_folder, fn1+fn2_dst)))
+
+            convert_result = subprocess.call('"{}" "{}" "{}"'.format(
+                os.path.join(conf.IMAGE_MAGIC_DIR, 'convert'),
+                os.path.join(media_folder, media_file_name),
+                os.path.join(media_folder, fn1+fn2_dst)))
         if convert_result == 0:
             os.remove(os.path.join(media_folder, media_file_name))
             converted_file_names.append((media_file_name, fn1+fn2_dst, re.compile('media/'+media_file_name), 'media/'+fn1+fn2_dst))

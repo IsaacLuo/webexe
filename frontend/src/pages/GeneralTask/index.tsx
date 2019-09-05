@@ -13,7 +13,7 @@ import {
 
 // other tools
 import styled from 'styled-components'
-import {Button, Progress, InputNumber} from 'element-react'
+import {Button, Progress, InputNumber, Loading} from 'element-react'
 import ProgressMonitorPanel from '../../components/ProgressMonitorPanel'
 import Dropzone, {useDropzone} from 'react-dropzone'
 import Axios from 'axios';
@@ -40,15 +40,7 @@ const CodePanel = styled.div`
   overflow-y: scroll;
 `
 
-const MyDropzoneDiv = styled.div`
-  border-style: solid;
-  border-radius: 10px;
-  margin: 20px;
-  width: 80%;
-  padding: 20px;
-  min-height: 100px;
-  background: #dff;
-`
+
 // function MyDropzone() {
 //   const onDrop = useCallback(acceptedFiles => {
 //     // Do something with the files
@@ -233,11 +225,28 @@ class GeneralTask extends React.Component<IProps, IState> {
           step={settings.step}
           />
       case 'file':
-        return <Dropzone onDrop={async (files:File[])=>{
+        return <Loading loading={states.loading}><Dropzone onDrop={this.onDropFile.bind(this, settings, states, onChange)}>
+        {({getRootProps, getInputProps}) => (
+          <section>
+            <MyDropzoneDiv {...getRootProps()}>
+              <input {...getInputProps()} />
+              <p>Drag 'n' drop some files here, or click to select files</p>
+            </MyDropzoneDiv>
+          </section>
+        )}
+      </Dropzone>
+      </Loading>
+      default:
+        return <div>unsupported control</div>
+    }
+  }
+
+  private onDropFile = async (settings:any, states: any, onChange:(value:any)=>void, files:File[])=>{
           const filePaths:string[] = [];
           try {
+            // tslint:disable-next-line: forin
             for (const i in files) {
-              if (settings.singleFile && parseInt(i) > 0) {
+              if (settings.singleFile && parseInt(i, 10) > 0) {
                 break;
               }
               const file = files[i];
@@ -257,20 +266,7 @@ class GeneralTask extends React.Component<IProps, IState> {
           } catch (err) {
             console.error(err);
           }
-        }}>
-        {({getRootProps, getInputProps}) => (
-          <section>
-            <MyDropzoneDiv {...getRootProps()}>
-              <input {...getInputProps()} />
-              <p>Drag 'n' drop some files here, or click to select files</p>
-            </MyDropzoneDiv>
-          </section>
-        )}
-      </Dropzone>
-      default:
-        return <div>unsupported control</div>
-    }
-  }
+        }
 
   private onParamChange = (controlType:any, paramName:string, value:any) => {
     const {params} = this.state;
