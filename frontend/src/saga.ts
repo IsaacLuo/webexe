@@ -15,6 +15,8 @@ import {
   SHOW_DISCONNECTED,
   GET_AVAILABLE_TASKS,
   SET_AVAILABLE_TASKS,
+  SET_LOGGED_IN,
+  LOG_OUT,
   } from './actions'
 
 export function* onFileUploadingFailed(action:IAction) {
@@ -35,19 +37,32 @@ export function* getAllTasks() {
   try {
     const tasks = yield call(axios.get, `${config.backendURL}/api/tasks`, {withCredentials: true});
     yield put({type:SET_AVAILABLE_TASKS, data: tasks.data});
+    yield put({type:SET_LOGGED_IN, data: true});
   } catch (err) {
+    yield put({type:SET_LOGGED_IN, data: false});
 
+  }
+}
+
+export function* logout(action: IAction) {
+  try {
+    yield call(axios.delete, config.authServerURL + '/api/session', {withCredentials: true});
+  } catch (error) {
+    console.warn('unable to logout');
   }
 }
 
 export function* watchSystemMessage() {
   yield takeEvery(FILE_UPLOADING_FAILED, onFileUploadingFailed);
   yield takeLatest(TEST_CONNECTION, onTestConnection);
+  yield takeLatest(LOG_OUT, logout);
 }
 
 export function* watchTaskDict() {
   yield takeLatest(GET_AVAILABLE_TASKS, getAllTasks);
 }
+
+
 
 export default function* rootSaga() {
   yield all([

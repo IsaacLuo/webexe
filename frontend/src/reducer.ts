@@ -2,13 +2,14 @@ import { combineReducers } from 'redux';
 
 import { IAppStoreState, IAction } from './types';
 import config from './config'
-import { SET_AVAILABLE_TASKS } from './actions';
+import { SET_AVAILABLE_TASKS, SET_LOGGED_IN } from './actions';
 import generalTask from './pages/GeneralTask/reducers';
 
 function app(state :IAppStoreState = {
   message: '',
   messageStyle: 'normal',
   availableTasks: {},
+  loggedIn: false,
 }, action: IAction) {
   switch (action.type) {
     case 'SHOW_CONNECTED':
@@ -27,6 +28,11 @@ function app(state :IAppStoreState = {
       return {
         ...state,
         availableTasks: action.data,
+      }
+    case SET_LOGGED_IN:
+      return {
+        ...state,
+        loggedIn: action.data,
       }
     default:
       return state;

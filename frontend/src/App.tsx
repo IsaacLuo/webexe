@@ -22,6 +22,7 @@ import {
   TEST_CONNECTION, GET_AVAILABLE_TASKS
 } from './actions'
 import TaskManager from './pages/TaskManager';
+import { Button } from 'element-react'
 
 interface IProps {
   message:string,
@@ -29,6 +30,7 @@ interface IProps {
   dispatchGetAvailabTasks:()=>void,
   testConnection:()=>void,
   availableTasks: {[key:string]:TaskDefinition},
+  loggedIn: boolean,
 }
 
 interface IState {
@@ -55,6 +57,13 @@ class App extends React.Component<IProps, IState> {
       <div className="App">
         <NavBar/>
         <main>
+          {
+            !this.props.loggedIn
+          ?
+          <MyPanel>
+            <Button type='primary' onClick={this.onClickLogin}>Login to Cailab</Button>
+          </MyPanel>
+          :
           <MyPanel>
             <Route path='/' exact={true} component={Dashboard} />
             {availableTasks &&
@@ -70,11 +79,38 @@ class App extends React.Component<IProps, IState> {
             }
             <p className={`message-bar ${messageStyle}`}>{message}</p>
           </MyPanel>
+          }
         </main>
         <FootBar/>
       </div>
     );
   }
+
+  private onClickLogin = () => {
+    const width = 400;
+    const height = 560;
+    const top = (window.screen.availHeight / 2) - (height / 2);
+    const left = (window.screen.availWidth / 2) - (width / 2);
+
+    window.addEventListener('message', this.onLogginWindowClosed, false);
+    const subWindow = window.open(
+      'https://auth.cailab.org/login',
+      'cailablogin',
+// tslint:disable-next-line: max-line-length
+      `toolbar=no,location=no,status=no,menubar=no,scrollbar=yes,resizable=yes,width=${width},height=${height},top=${top},left=${left}`,
+    );
+  }
+
+  private onLogginWindowClosed = (messageEvent: MessageEvent) => {
+    const {origin, data} = messageEvent;
+    console.log(origin, messageEvent);
+    if (data.event === 'closed' && data.success === true) {
+      console.log('---------------------');  
+      this.props.dispatchGetAvailabTasks();
+    }
+    window.removeEventListener('message', this.onLogginWindowClosed);
+  }
+
 }
 
 
@@ -82,6 +118,7 @@ const mapStateToProps = (state :IStoreState) => ({
   message: state.app.message,
   messageStyle: state.app.messageStyle,
   availableTasks: state.app.availableTasks,
+  loggedIn: state.app.loggedIn,
 })
 
 const mapDispatchToProps = (dispatch :Dispatch) => ({

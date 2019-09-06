@@ -16,28 +16,33 @@ const MyDropzoneDiv = styled.div`
 `
 
 interface IProps {
-  onChange: (filePath: string)=>void;
+  onChange: (filePath: string[])=>void;
   singleFile?: boolean;
 }
 interface IState {
   loading: boolean;
+  storedFileName: string[];
 }
 
 export default class MyDropZone extends React.Component<IProps, IState> {
+
+
   constructor(props:IProps){
     super(props);
     this.state = {
       loading: false,
+      storedFileName: [],
     }
   }
 
   render () {
-    return <Loading loading={this.state.loading}><Dropzone onDrop={this.onDropFile.bind(this, settings, states, onChange)}>
+    return <Loading loading={this.state.loading}><Dropzone onDrop={this.onDropFile}>
         {({getRootProps, getInputProps}) => (
           <section>
             <MyDropzoneDiv {...getRootProps()}>
               <input {...getInputProps()} />
               <p>Drag 'n' drop some files here, or click to select files</p>
+              {this.state.storedFileName.map((v,i)=><div key={i}>{v}</div>)}
             </MyDropzoneDiv>
           </section>
         )}
@@ -45,16 +50,16 @@ export default class MyDropZone extends React.Component<IProps, IState> {
       </Loading>
   }
 
-    private onDropFile = async (settings:any, states: any, onChange:(value:any)=>void, files:File[])=>{
+    private onDropFile = async ( files:File[])=>{
       const filePaths:string[] = [];
       try {
         // tslint:disable-next-line: forin
+        this.setState({loading: true});
         for (const i in files) {
-          if (settings.singleFile && parseInt(i, 10) > 0) {
+          if (this.props.singleFile && parseInt(i, 10) > 0) {
             break;
           }
           const file = files[i];
-          console.log(files);
           const formData = new FormData();
           formData.append('file', file)
           const result = await Axios.post(
@@ -65,10 +70,13 @@ export default class MyDropZone extends React.Component<IProps, IState> {
           if (filePath) {
             filePaths.push(filePath);
           }
+          this.setState({storedFileName: [...this.state.storedFileName, file.name]})
         }
-        onChange(filePaths);
+        this.props.onChange(filePaths);
       } catch (err) {
         console.error(err);
+      } finally {
+        this.setState({loading: false});
       }
     }
 }

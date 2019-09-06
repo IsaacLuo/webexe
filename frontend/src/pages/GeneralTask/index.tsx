@@ -18,6 +18,7 @@ import ProgressMonitorPanel from '../../components/ProgressMonitorPanel'
 import Dropzone, {useDropzone} from 'react-dropzone'
 import Axios from 'axios';
 import config from 'config';
+import MyDropzone from '../../components/MyDropZone'
 
 
 
@@ -225,17 +226,7 @@ class GeneralTask extends React.Component<IProps, IState> {
           step={settings.step}
           />
       case 'file':
-        return <Loading loading={states.loading}><Dropzone onDrop={this.onDropFile.bind(this, settings, states, onChange)}>
-        {({getRootProps, getInputProps}) => (
-          <section>
-            <MyDropzoneDiv {...getRootProps()}>
-              <input {...getInputProps()} />
-              <p>Drag 'n' drop some files here, or click to select files</p>
-            </MyDropzoneDiv>
-          </section>
-        )}
-      </Dropzone>
-      </Loading>
+        return <MyDropzone onChange = {onChange}/>
       default:
         return <div>unsupported control</div>
     }

@@ -21,6 +21,7 @@ export interface IAppStoreState {
   message: string,
   messageStyle: string,
   availableTasks: {[key:string]:TaskDefinition},
+  loggedIn: boolean,
 }
 
 export interface INamedLink {
