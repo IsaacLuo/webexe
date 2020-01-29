@@ -30,8 +30,9 @@ export function runExe (
       }
     })
 
-    subProcess.stderr.on('data', (data) => {
-      console.log(data);
+    subProcess.stderr.on('data', (data:Buffer) => {
+      
+      console.log(data.toString());
       if (onStdErr) {
         onStdErr(data.toString());
       }

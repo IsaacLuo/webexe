@@ -45,5 +45,42 @@ export default {
         essential: true,
       }
     ]
+  },
+  generate_promoter_terminator: {
+    name: 'generate_promoter_terminator',
+    description: 'generate promoters and terminiators automatically in chomsome definition file',
+    params: [
+      {
+        name: 'srcFileName',
+        control: 'file',
+        controlSettings: {
+          singleFile:true,
+          fileLimit: 1024*1024*1024,
+        },
+        essential: true,
+      },
+      {
+        name: 'prmoterLength',
+        control: 'numeric',
+        controlSettings: {
+          min: 1,
+          max: 1000,
+          step: 1,
+        },
+        default: 500,
+        essential: true,
+      },
+      {
+        name: 'terminatorLength',
+        control: 'numeric',
+        controlSettings: {
+          min: 1,
+          max: 1000,
+          step: 1,
+        },
+        default: 200,
+        essential: true,
+      }
+    ]
   }
 }

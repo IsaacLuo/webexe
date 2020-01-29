@@ -15,6 +15,9 @@ def progress(progress, message=''):
 def result(data, message=''):
     print(json.dumps({'type':'result', 'data':data, 'message': message}), file=sys.stdout, flush=True)
 
+def abort(data, message=''):
+    print(json.dumps({'type':'abort', 'data':data, 'message': message}), file=sys.stdout, flush=True)
+
 def random_string(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))

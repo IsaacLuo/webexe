@@ -355,5 +355,5 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
 // -----------------------------------------------------------------------------------------------
 
 app.use(router.routes());
-app.listen(8000, '0.0.0.0');
-log4js.getLogger().info('webexe start listening at 8000');
+app.listen(conf.port, '0.0.0.0');
+log4js.getLogger().info(`webexe start listening at ${conf.port}`);

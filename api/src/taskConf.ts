@@ -10,5 +10,9 @@ export default {
   compress_pptx: {
     program: 'python3',
     params: ['scripts/py_ppt_comporess.py', '{srcFileName}'],
+  },
+  generate_promoter_terminator: {
+    program: 'python3',
+    params: ['scripts/generate_promoter_terminator.py', '{srcFileName}', '{prmoterLength}', '{terminatorLength}'],
   }
 }
