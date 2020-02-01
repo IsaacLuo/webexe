@@ -58,6 +58,9 @@ def read_gff_json(gff_json):
                         terminator_start = max_length
                     if terminator_end > max_length:
                         terminator_end = max_length
+                # generate some attributes but not all of them
+                gene_id = record['attribute']['ID'] if 'ID' in record['attribute'] else ''
+                gene_name = record['attribute']['Name'] if 'Name' in record['attribute'] else ''
                 if promoter_start <= terminator_start:
                     new_records.append({
                         'seqName':record['seqName'],
@@ -67,7 +70,14 @@ def read_gff_json(gff_json):
                         'end': promoter_end,
                         'strand': record['strand'],
                         'frame': record['frame'],
-                        'attribute': record['attribute'],
+                        'attribute': {
+                            'ID': gene_id+'_promoter',
+                            'Name': gene_name+'_promoter',
+                        }
+                        'tags': {
+                            'createdAt': datetime.datetime.now().isoformat(),
+                            'createdBy': 'cailab-webexe'
+                        }
                         })
 
                     new_records.append({
@@ -78,7 +88,14 @@ def read_gff_json(gff_json):
                         'end': terminator_end,
                         'strand': record['strand'],
                         'frame': record['frame'],
-                        'attribute': record['attribute'],
+                        'attribute': {
+                            'ID': gene_id+'_terminator',
+                            'Name': gene_name+'_terminator',
+                        }
+                        'tags': {
+                            'createdAt': datetime.datetime.now().isoformat(),
+                            'createdBy': 'cailab-webexe'
+                        }
                         })
                 else:
                     new_records.append({
@@ -89,7 +106,14 @@ def read_gff_json(gff_json):
                         'end': terminator_end,
                         'strand': record['strand'],
                         'frame': record['frame'],
-                        'attribute': record['attribute'],
+                        'attribute': {
+                            'ID': gene_id+'_terminator',
+                            'Name': gene_name+'_terminator',
+                        }
+                        'tags': {
+                            'createdAt': datetime.datetime.now().isoformat(),
+                            'createdBy': 'cailab-webexe'
+                        }
                         })
                     new_records.append({
                         'seqName':record['seqName'],
@@ -99,7 +123,14 @@ def read_gff_json(gff_json):
                         'end': promoter_end,
                         'strand': record['strand'],
                         'frame': record['frame'],
-                        'attribute': record['attribute'],
+                        'attribute': {
+                            'ID': gene_id+'_promoter',
+                            'Name': gene_name+'_promoter',
+                        }
+                        'tags': {
+                            'createdAt': datetime.datetime.now().isoformat(),
+                            'createdBy': 'cailab-webexe'
+                        }
                         })
         webexe.progress(0.4, 'merging')
         #merge sort
