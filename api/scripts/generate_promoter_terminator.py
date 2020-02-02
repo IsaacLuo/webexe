@@ -91,7 +91,7 @@ def read_gff_json(gff_json):
                         'attribute': {
                             'ID': gene_id+'_terminator',
                             'Name': gene_name+'_terminator',
-                        }
+                        },
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
@@ -109,7 +109,7 @@ def read_gff_json(gff_json):
                         'attribute': {
                             'ID': gene_id+'_terminator',
                             'Name': gene_name+'_terminator',
-                        }
+                        },
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
@@ -126,7 +126,7 @@ def read_gff_json(gff_json):
                         'attribute': {
                             'ID': gene_id+'_promoter',
                             'Name': gene_name+'_promoter',
-                        }
+                        },
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
