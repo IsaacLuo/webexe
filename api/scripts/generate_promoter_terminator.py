@@ -25,7 +25,9 @@ def read_gff_json(gff_json):
     if 'records' in gff_json:
         original_records = gff_json['records']
         new_records = []
-        for record in original_records:
+        records_len = len(original_records)
+        for i, record in enumerate(original_records):
+            webexe.progress(0.4 * i/records_len, 'doing {}/{}'.format(i, records_len))
             if record['feature'] == 'gene':
                 start = record['start']
                 end = record['end']
