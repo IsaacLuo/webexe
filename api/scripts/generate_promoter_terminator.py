@@ -3,6 +3,7 @@ import time
 import sys
 import webexe
 import os
+import datetime
 
 if len(sys.argv) < 1:
     webexe.message('input file required')
@@ -28,7 +29,7 @@ def read_gff_json(gff_json):
         records_len = len(original_records)
         for i, record in enumerate(original_records):
             webexe.progress(0.4 * i/records_len, 'doing {}/{}'.format(i, records_len))
-            if record['feature'] == 'gene':
+            if record['featureType'] == 'gene':
                 start = record['start']
                 end = record['end']
                 strand = record['strand']
@@ -67,11 +68,10 @@ def read_gff_json(gff_json):
                     new_records.append({
                         'seqName':record['seqName'],
                         'source':'cailab_generate_promoter_terminator',
-                        'feature': 'promoter',
+                        'featureType': 'promoter',
                         'start': promoter_start,
                         'end': promoter_end,
                         'strand': record['strand'],
-                        'frame': record['frame'],
                         'attribute': {
                             'ID': gene_id+'_promoter',
                             'Name': gene_name+'_promoter',
@@ -85,11 +85,10 @@ def read_gff_json(gff_json):
                     new_records.append({
                         'seqName':record['seqName'],
                         'source':'cailab_generate_promoter_terminator',
-                        'feature': 'terminator',
+                        'featureType': 'terminator',
                         'start': terminator_start,
                         'end': terminator_end,
                         'strand': record['strand'],
-                        'frame': record['frame'],
                         'attribute': {
                             'ID': gene_id+'_terminator',
                             'Name': gene_name+'_terminator',
@@ -103,11 +102,10 @@ def read_gff_json(gff_json):
                     new_records.append({
                         'seqName':record['seqName'],
                         'source':'cailab_generate_promoter_terminator',
-                        'feature': 'terminator',
+                        'featureType': 'terminator',
                         'start': terminator_start,
                         'end': terminator_end,
                         'strand': record['strand'],
-                        'frame': record['frame'],
                         'attribute': {
                             'ID': gene_id+'_terminator',
                             'Name': gene_name+'_terminator',
@@ -120,11 +118,10 @@ def read_gff_json(gff_json):
                     new_records.append({
                         'seqName':record['seqName'],
                         'source':'cailab_generate_promoter_terminator',
-                        'feature': 'promoter',
+                        'featureType': 'promoter',
                         'start': promoter_start,
                         'end': promoter_end,
                         'strand': record['strand'],
-                        'frame': record['frame'],
                         'attribute': {
                             'ID': gene_id+'_promoter',
                             'Name': gene_name+'_promoter',
@@ -183,3 +180,4 @@ try:
     webexe.result({'files':[{'name':'output'+ext, 'url':output_filename}]},'finish')
 except Exception as err:
     webexe.abort({}, str(err))
+    print(err, file=sys.stderr)
