@@ -60,7 +60,7 @@ export default {
         essential: true,
       },
       {
-        name: 'prmoterLength',
+        name: 'promoterLength',
         control: 'numeric',
         controlSettings: {
           min: 1,
