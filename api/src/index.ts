@@ -40,7 +40,7 @@ global.tasks = {};
 const app = websockify(new koa());
 const router = new Router();
 
-type Ctx = koa.ParameterizedContext<ICustomState, {}>;
+type Ctx = koa.ParameterizedContext<ICustomState>;
 type Next = ()=>Promise<any>;
 
 app.use(cors({credentials: true}));
@@ -301,9 +301,9 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
     } else if (process.state === 'running') {
       ctx.websocket.send(JSON.stringify({type:'signal', message:'attached to socket'}));
       ctx.websocket.send(JSON.stringify({type:'processState', message:'running'}));
-      process.webSockets.add(ctx.websocket);
+      process.webSockets.add(ctx.websocket as any);
     } else {
-      process.webSockets.add(ctx.websocket);
+      process.webSockets.add(ctx.websocket as any);
       // run task
       try {
         process.state = 'running';
