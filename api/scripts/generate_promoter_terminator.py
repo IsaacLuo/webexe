@@ -76,6 +76,9 @@ def read_gff_json(gff_json):
                             'ID': gene_id+'_promoter',
                             'Name': gene_name+'_promoter',
                         },
+                        'chrId': record['chrId'],
+                        'chrName': record['chrName'],
+                        'chrFileName': record['chrFileName'],
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
@@ -93,6 +96,9 @@ def read_gff_json(gff_json):
                             'ID': gene_id+'_terminator',
                             'Name': gene_name+'_terminator',
                         },
+                        'chrId': record['chrId'],
+                        'chrName': record['chrName'],
+                        'chrFileName': record['chrFileName'],
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
@@ -110,6 +116,9 @@ def read_gff_json(gff_json):
                             'ID': gene_id+'_terminator',
                             'Name': gene_name+'_terminator',
                         },
+                        'chrId': record['chrId'],
+                        'chrName': record['chrName'],
+                        'chrFileName': record['chrFileName'],
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
@@ -126,6 +135,9 @@ def read_gff_json(gff_json):
                             'ID': gene_id+'_promoter',
                             'Name': gene_name+'_promoter',
                         },
+                        'chrId': record['chrId'],
+                        'chrName': record['chrName'],
+                        'chrFileName': record['chrFileName'],
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
