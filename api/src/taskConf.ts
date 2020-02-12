@@ -13,6 +13,6 @@ export default {
   },
   generate_promoter_terminator: {
     program: 'python3',
-    params: ['scripts/generate_promoter_terminator.py', '{srcFileName}', '{prmoterLength}', '{terminatorLength}'],
+    params: ['scripts/generate_promoter_terminator.py', '{srcFileName}', '{promoterLength}', '{terminatorLength}'],
   }
 }
