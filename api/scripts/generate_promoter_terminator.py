@@ -64,6 +64,10 @@ def read_gff_json(gff_json):
                 # generate some attributes but not all of them
                 gene_id = record['attribute']['ID'] if 'ID' in record['attribute'] else ''
                 gene_name = record['attribute']['Name'] if 'Name' in record['attribute'] else ''
+                name = record['name'] if 'name' in record else ''
+                chrId = record['chrId'] if 'chrId' in record else 0
+                chrName = record['chrName'] if 'chrName' in record else ''
+                chrFileName = record['chrFileName'] if 'chrFileName' in record else None
                 if promoter_start <= terminator_start:
                     new_records.append({
                         'seqName':record['seqName'],
@@ -76,9 +80,10 @@ def read_gff_json(gff_json):
                             'ID': gene_id+'_promoter',
                             'Name': gene_name+'_promoter',
                         },
-                        'chrId': record['chrId'],
-                        'chrName': record['chrName'],
-                        'chrFileName': record['chrFileName'],
+                        'name': name,
+                        'chrId': chrId,
+                        'chrName': chrName,
+                        'chrFileName': chrFileName,
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
@@ -96,9 +101,10 @@ def read_gff_json(gff_json):
                             'ID': gene_id+'_terminator',
                             'Name': gene_name+'_terminator',
                         },
-                        'chrId': record['chrId'],
-                        'chrName': record['chrName'],
-                        'chrFileName': record['chrFileName'],
+                        'name': name,
+                        'chrId': chrId,
+                        'chrName': chrName,
+                        'chrFileName': chrFileName,
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
@@ -116,9 +122,10 @@ def read_gff_json(gff_json):
                             'ID': gene_id+'_terminator',
                             'Name': gene_name+'_terminator',
                         },
-                        'chrId': record['chrId'],
-                        'chrName': record['chrName'],
-                        'chrFileName': record['chrFileName'],
+                        'name': name,
+                        'chrId': chrId,
+                        'chrName': chrName,
+                        'chrFileName': chrFileName,
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
@@ -135,9 +142,10 @@ def read_gff_json(gff_json):
                             'ID': gene_id+'_promoter',
                             'Name': gene_name+'_promoter',
                         },
-                        'chrId': record['chrId'],
-                        'chrName': record['chrName'],
-                        'chrFileName': record['chrFileName'],
+                        'name': name,
+                        'chrId': chrId,
+                        'chrName': chrName,
+                        'chrFileName': chrFileName,
                         'tags': {
                             'createdAt': datetime.datetime.now().isoformat(),
                             'createdBy': 'cailab-webexe'
