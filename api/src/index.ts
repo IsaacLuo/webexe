@@ -14,12 +14,17 @@ import taskConf from './taskConf';
 import conf from '../conf';
 import path from 'path';
 import fs from 'fs';
-import mimetype from 'mime-types'
+import mimetype from 'mime-types';
+import http from 'http';
+import socket from 'socket.io';
+
 const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
 const fs_mkdir = promisify(fs.mkdir);
 
 // import redis from 'redis'
+
+
 
 
 // const redisClient = redis.createClient(6379, '127.0.0.1');
@@ -351,9 +356,16 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
 }))
 
 
+// ----------------------------------socket.io part----------------------------------------------
+const server = http.createServer(app.callback());
+const io = socket(server);
+
+
 
 // -----------------------------------------------------------------------------------------------
 
 app.use(router.routes());
-app.listen(conf.port, '0.0.0.0');
+// app.listen(conf.port, '0.0.0.0');
+server.listen(conf.port);
+
 log4js.getLogger().info(`webexe start listening at ${conf.port}`);

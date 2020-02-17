@@ -4,3 +4,9 @@
 /api/scripts/__pycache__/*.pyc
 /api/results
 /api/uploads
+/api/conf.json
+/api/nohup.out
+/api/src/conf.json
+/frontend/conf.json
+/frontend/nohup.out
+/frontend/src/conf.json
