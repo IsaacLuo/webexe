@@ -6,7 +6,7 @@ import { withRouter, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 
-import config from '../config'
+import conf from 'conf.json'
 
 import {Menu} from 'element-react'
 import styled from 'styled-components'
@@ -28,7 +28,7 @@ class FootBar extends React.Component<IProps, IState> {
     return (
     <FootBarPanel>
       <p>{process.env.NODE_ENV} version 0.1.0</p>
-      <p>{JSON.stringify(process.env)} {JSON.stringify(config)}</p>
+      <p>{JSON.stringify(process.env)} {JSON.stringify(conf)}</p>
     </FootBarPanel>
     )
   }

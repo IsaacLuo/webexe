@@ -14,7 +14,7 @@ import{
   SET_MESSAGE,
 } from './actions'
 
-import config from '../../config'
+import config from 'conf.json'
 
 export default function reducer(state:ITaskManagerStoreState  = {
   tasks: {},

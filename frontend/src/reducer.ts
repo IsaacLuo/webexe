@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 
 import { IAppStoreState, IAction } from './types';
-import config from './config'
+import config from './conf.json'
 import { SET_AVAILABLE_TASKS, SET_LOGGED_IN } from './actions';
 import generalTask from './pages/GeneralTask/reducers';
 

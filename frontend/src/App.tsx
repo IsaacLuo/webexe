@@ -23,6 +23,8 @@ import {
 } from './actions'
 import TaskManager from './pages/TaskManager';
 import { Button } from 'element-react'
+import conf from './conf.json';
+import io from 'socket.io-client';
 
 interface IProps {
   message:string,
@@ -53,12 +55,17 @@ class App extends React.Component<IProps, IState> {
 
   public render() {
     const {message, messageStyle, availableTasks} = this.props;
+
+    const socket = io(conf.backendURL);
+    socket.emit('runTask', 1,{a:2}, (n:number)=>console.log(n));
+    socket.on('progress', (v:any)=>console.log(v))
+
     return (
       <div className="App">
         <NavBar/>
         <main>
           {
-            !this.props.loggedIn
+            !this.props.loggedIn && !conf.localMode
           ?
           <MyPanel>
             <Button type='primary' onClick={this.onClickLogin}>Login to Cailab</Button>

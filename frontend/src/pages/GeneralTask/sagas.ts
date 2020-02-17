@@ -1,10 +1,9 @@
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
-import config from '../../config'
 import uploadFile from '../../common/uploadFile'
 import { eventChannel } from 'redux-saga'
 import {delay} from 'redux-saga/effects'
 import {Notification} from 'element-react'
-
+import config from 'conf.json';
 import {
   IAction,
   IFileUploadAction,
@@ -34,8 +33,6 @@ import{
   UPLOAD_FILE_PARAMS,
 } from './actions'
 import Axios from 'axios';
-
-const wsURL = `${config.pythonServerURL}/api/ws/testLongTask?token=1234`;
 
 function* heartBeat(action: IAction) {
   const ws = action.data;
@@ -84,7 +81,7 @@ function* startTask(action:IAction) {
     yield put({type:SET_PROCESS_ID, data:processId});
 
     // 2. create websocket to receive progress
-    const webSocket = new WebSocket(`${config.pythonServerURL}/ws/process/${processId}`);
+    const webSocket = new WebSocket(`${config.backendURL}/ws/process/${processId}`);
     const channel = yield call(initWebSocket, webSocket);
     yield put({type:SET_WS, data: webSocket});
     // yield put({type:HEARTBEAT, data:webSocket});

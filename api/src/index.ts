@@ -11,7 +11,7 @@ import taskDescriptions from './taskDescriptions'
 import uuid from 'uuid'
 import { runExe } from './runExe';
 import taskConf from './taskConf';
-import conf from '../conf';
+import conf from './conf.json';
 import path from 'path';
 import fs from 'fs';
 import mimetype from 'mime-types';
@@ -65,7 +65,7 @@ function userMust (...args: Array<(ctx:koa.ParameterizedContext<any, {}>, next:(
 
 function beUser (ctx:Ctx, next?:Next) {
   // console.log(ctx.state.user.groups);
-  return ctx.state.user && (ctx.state.user.groups.indexOf('webexe/users')>=0 || ctx.state.user.groups.indexOf('users')>=0);
+  return conf.localMode || ctx.state.user && (ctx.state.user.groups.indexOf('webexe/users')>=0 || ctx.state.user.groups.indexOf('users')>=0);
   // return ctx.state.user!== undefined;
 }
 
@@ -360,7 +360,16 @@ app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
 const server = http.createServer(app.callback());
 const io = socket(server);
 
-
+io.on('connection', (socket)=>{
+  console.log('socket.io connection');
+  socket.on('runTask', (id, params, callback)=>{
+    for (let i=0;i<10;i++) {
+      socket.emit('progress', i*0.1);
+    }
+    socket.emit('state', 'finish');
+    callback(12345);
+  })
+})
 
 // -----------------------------------------------------------------------------------------------
 

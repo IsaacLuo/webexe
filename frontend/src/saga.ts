@@ -7,7 +7,7 @@ import watchTaskManager from './pages/TaskManager/sagas'
 import watchGeneralTask from './pages/GeneralTask/sagas'
 
 import axios from 'axios';
-import config from './config';
+import config from './conf.json';
 import {
   TEST_CONNECTION,
   FILE_UPLOADING_FAILED,

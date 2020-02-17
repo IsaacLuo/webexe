@@ -17,7 +17,7 @@ import {Button, Progress, InputNumber, Loading} from 'element-react'
 import ProgressMonitorPanel from '../../components/ProgressMonitorPanel'
 import Dropzone, {useDropzone} from 'react-dropzone'
 import Axios from 'axios';
-import config from 'config';
+import conf from 'conf.json';
 import MyDropzone from '../../components/MyDropZone'
 
 
@@ -208,7 +208,7 @@ class GeneralTask extends React.Component<IProps, IState> {
         comps = [...comps, result.files.map((v,i)=>
         <div key={i}>
           {v.data && <a href={v.data} download={v.name} target="_blank">{v.name}</a> }
-          {v.url && <a href={`${config.backendURL}/api/resultFile/${v.url}/as/${v.name}`} download={v.name} target="_blank">{v.name}</a> }
+          {v.url && <a href={`${conf.backendURL}/api/resultFile/${v.url}/as/${v.name}`} download={v.name} target="_blank">{v.name}</a> }
         </div>)]
       }
     }
@@ -245,7 +245,7 @@ class GeneralTask extends React.Component<IProps, IState> {
               const formData = new FormData();
               formData.append('file', file)
               const result = await Axios.post(
-                `${config.backendURL}/api/fileParam/`, 
+                `${conf.backendURL}/api/fileParam/`, 
                 formData, 
                 {headers: {'content-type': 'multipart/form-data'}, withCredentials:true});
               const {filePath} = result.data;

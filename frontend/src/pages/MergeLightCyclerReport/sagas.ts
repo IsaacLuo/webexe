@@ -2,7 +2,7 @@
  * @file MergeLightCyclerReport sagas
  */
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
-import config from '../../config'
+import config from 'conf.json'
 import uploadFile from '../../common/uploadFile'
 import { eventChannel} from 'redux-saga'
 import {delay} from 'redux-saga/effects'
@@ -39,7 +39,7 @@ import{
 } from './actions'
 import { UPLOAD_FILE_PARAMS } from 'pages/GeneralTask/actions';
 
-const wsURL = `${config.pythonServerURL}/api/ws/mergeLightCycler?token=1234`;
+const wsURL = `${config.backendURL}/api/ws/mergeLightCycler?token=1234`;
 
 export function* uploadTempFile(action:IFileUploadAction) {
   const {file} = action.data;

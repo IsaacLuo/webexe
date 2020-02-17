@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import {Loading} from 'element-react'
 import Dropzone, {useDropzone} from 'react-dropzone'
 import Axios from 'axios';
-import config from 'config';
+import config from 'conf.json';
 
 const MyDropzoneDiv = styled.div`
   border-style: solid;

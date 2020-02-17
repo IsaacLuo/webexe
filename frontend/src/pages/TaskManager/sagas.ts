@@ -1,5 +1,5 @@
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
-import config from '../../config'
+import config from 'conf.json'
 import uploadFile from '../../common/uploadFile'
 import { eventChannel} from 'redux-saga'
 import {delay} from 'redux-saga/effects'
@@ -24,7 +24,7 @@ import{
   
 } from './actions'
 
-const wsURL = `${config.pythonServerURL}/api/ws/taskManager?token=1234`;
+const wsURL = `${config.backendURL}/api/ws/taskManager?token=1234`;
 type IPageState = ITaskManagerStoreState;
 const subStoreKey = 'taskManager';
 
