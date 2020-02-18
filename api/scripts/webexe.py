@@ -3,6 +3,12 @@ import json
 import random
 import string
 
+# message types to stdout
+# log, any string message to tell client
+# progress, show the percentage, 0-100
+# result, put any object in data
+# abort, exit code
+
 def log(message):
     print(message, file=sys.stderr, flush=True)
 

@@ -56,10 +56,6 @@ class App extends React.Component<IProps, IState> {
   public render() {
     const {message, messageStyle, availableTasks} = this.props;
 
-    const socket = io(conf.backendURL);
-    socket.emit('runTask', 1,{a:2}, (n:number)=>console.log(n));
-    socket.on('progress', (v:any)=>console.log(v))
-
     return (
       <div className="App">
         <NavBar/>

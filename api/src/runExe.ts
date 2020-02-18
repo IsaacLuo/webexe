@@ -23,7 +23,7 @@ export function runExe (
     // const allObjects:any[] = [];
     
     rl.on('line', input => {
-      console.log('debug: ', input);
+      // console.log('debug: ', input);
       const messageObj = JSON.parse(input.toString());
       if(onOutput) {
         onOutput(messageObj, subProcess.stdin);
@@ -31,8 +31,7 @@ export function runExe (
     })
 
     subProcess.stderr.on('data', (data:Buffer) => {
-      
-      console.log(data.toString());
+      // console.log(data.toString());
       if (onStdErr) {
         onStdErr(data.toString());
       }

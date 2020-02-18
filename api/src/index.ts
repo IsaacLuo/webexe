@@ -1,4 +1,5 @@
-import { ICustomState, IProcessDict, IProcess} from './types';
+/// <reference path="@types/index.d.ts" />
+// import { ICustomState, IProcessDict, IProcess} from './types';
 import koa from 'koa';
 import koaBody from 'koa-body';
 import websockify from 'koa-websocket';
@@ -17,12 +18,26 @@ import fs from 'fs';
 import mimetype from 'mime-types';
 import http from 'http';
 import socket from 'socket.io';
+import TaskDict from './TaskDict';
 
 const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
 const fs_mkdir = promisify(fs.mkdir);
 
 // import redis from 'redis'
+
+// let client = redis.createClient(6379, '127.0.0.1')
+// client.on('error', function (err) {
+//   console.log('Error ' + err);
+// });
+
+// 1 键值对
+// client.set('color', 'red', redis.print);
+// client.get('color', function(err, value) {
+//   if (err) throw err;
+//   console.log('Got: ' + value)
+//   client.quit();
+// })
 
 
 
@@ -35,12 +50,12 @@ const fs_mkdir = promisify(fs.mkdir);
 declare global {
   namespace NodeJS {
     interface Global {
-      tasks: IProcessDict;
+      taskDict: TaskDict;
     }
   }
 }
 // store all tasks in global, maybe redis in the future?
-global.tasks = {};  
+global.taskDict = new TaskDict();  
 
 const app = websockify(new koa());
 const router = new Router();
@@ -139,93 +154,61 @@ async (ctx:Ctx, next:Next)=> {
     }
   }
   console.log('taskParams', taskParams);
-  let processId;
-  do {
-    processId = uuid.v4();
-  } while(global.tasks[processId]!==undefined);
   
-  global.tasks[processId] = {
-    processId,
-    program: taskConf[taskName].program,
-    params: taskParams,
-    taskName,
-    state: 'ready',
-    webSockets:new Set(),
-    result: undefined,
-    createdAt: new Date(),
-  }
+  let processId = global.taskDict.initialTask(taskName, taskParams);
 
   ctx.body = {
     processId,
     taskName,
   }
-
+  io.in(processId).emit('state', 'ready');
   next();
-
 },
 async (ctx:Ctx, next:Next)=> {
   // kill tasks last 1 hour or more
-  const processIds = Object.keys(global.tasks);
-  processIds.forEach(processId => {
-    const process = global.tasks[processId];
-    if (process && process.createdAt && process.createdAt.getTime() < Date.now() - 3600000) {
-      sendToAllClient(processId, {type:'', message:'timeout'});
-      process.webSockets.forEach(ws => {
-        if (ws.readyState === ws.OPEN) {
-          ws.close();
-        }
-      });
-      delete global.tasks[processId];
-    }
-  });
+  global.taskDict.removeOldTasks();
 }
 );
 
-router.get('/api/processes/',
-async (ctx:Ctx, next:Next)=> {
-  ctx.body = global.tasks;
-}
-);
+// router.get('/api/process/:id/state',
+// userMust(beUser),
+// async (ctx:Ctx, next:Next)=> {
+//   const processId = ctx.params.id;
+//   const process = global.tasks[processId];
+//   ctx.body = {state:process.state};
+// }
+// );
 
-router.get('/api/process/:id/state',
-userMust(beUser),
-async (ctx:Ctx, next:Next)=> {
-  const processId = ctx.params.id;
-  const process = global.tasks[processId];
-  ctx.body = {state:process.state};
-}
-);
+// router.get('/api/process/:id/result',
+// userMust(beUser),
+// async (ctx:Ctx, next:Next)=> {
+//   const processId = ctx.params.id;
+//   const process = global.tasks[processId];
+//   if (process.state !== 'done') {
+//     ctx.throw(404);
+//   } else {
+//     ctx.body = {result: process.result};
+//   }
+// });
 
-router.get('/api/process/:id/result',
-userMust(beUser),
-async (ctx:Ctx, next:Next)=> {
-  const processId = ctx.params.id;
-  const process = global.tasks[processId];
-  if (process.state !== 'done') {
-    ctx.throw(404);
-  } else {
-    ctx.body = {result: process.result};
-  }
-});
-
-router.delete('/api/process/:id',
-userMust(beUser),
-async (ctx:Ctx, next:Next)=> {
-  const processId = ctx.params.id;
-  const process = global.tasks[processId];
-  // terminate process
-  if(process.subProcessInst) {
-    process.subProcessInst.kill();
-  }
-  sendToAllClient(processId, {type:'signal', message:'process aborted'});
-  process.webSockets.forEach(ws => {
-    if (ws.readyState === ws.OPEN) {
-      ws.close();
-    }
-  });
+// router.delete('/api/process/:id',
+// userMust(beUser),
+// async (ctx:Ctx, next:Next)=> {
+//   const processId = ctx.params.id;
+//   const process = global.tasks[processId];
+//   // terminate process
+//   if(process.subProcessInst) {
+//     process.subProcessInst.kill();
+//   }
+//   sendToAllClient(processId, {type:'signal', message:'process aborted'});
+//   process.webSockets.forEach(ws => {
+//     if (ws.readyState === ws.OPEN) {
+//       ws.close();
+//     }
+//   });
   
-  delete global.tasks[processId];
-});
+//   delete global.tasks[processId];
+// });
 
 router.post('/api/fileParam/',
 userMust(beUser),
@@ -247,18 +230,6 @@ async (ctx:Ctx, next:Next)=> {
   ctx.body = {filePath,};
 });
 
-// router.get(/api\/fileParam\/(.+)\/as\/(.+)/,
-// userMust(beUser),
-// async (ctx:Ctx, next:Next)=> {
-//   const match = /api\/fileParam\/(.+)\/as\/(.+)/.exec(ctx.request.url);
-//   const filePath = match[1];
-//   const rename = match[2];
-//   if (await fs_exists(filePath)) {
-
-//   }
-//   ctx.body = {message:match};
-// });
-
 router.get('/api/resultFile/:fileName/as/:desiredName',
 userMust(beUser),
 async (ctx:Ctx, next:Next)=> {
@@ -276,84 +247,84 @@ async (ctx:Ctx, next:Next)=> {
 
 //====================== websocket =======================
 
-function sendToAllClient(processId:string, object:any) {
-  const process = global.tasks[processId];
-  process.webSockets.forEach(ws => {
-    if (ws.readyState === ws.OPEN) {
-      ws.send(JSON.stringify(object));
-    }
-  })
-}
+// function sendToAllClient(processId:string, object:any) {
+//   const process = global.tasks[processId];
+//   process.webSockets.forEach(ws => {
+//     if (ws.readyState === ws.OPEN) {
+//       ws.send(JSON.stringify(object));
+//     }
+//   })
+// }
 
-app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
-  console.debug('processid=', id);
-  const process = global.tasks[id];
-    if (process){
-      ctx.websocket.send(JSON.stringify({type:'signal', message:`socket open for task ${process.taskName}`}));
-    } else {
-      console.debug('no process');
-      ctx.websocket.send(JSON.stringify({type:'signal', message:'process does not exist'}));
-      ctx.websocket.close();
-    }
-    if (process.state === 'done') {
-      ctx.websocket.send(JSON.stringify({type:'signal', message:'process already done'}));
-      ctx.websocket.send(JSON.stringify({type:'processState', message:'done'}));
-      ctx.websocket.close();
-    } else if (process.state === 'error') {
-      ctx.websocket.send(JSON.stringify({type:'signal', message:'process exited with an error'}));
-      ctx.websocket.send(JSON.stringify({type:'processState', message:'error'}));
-      ctx.websocket.close();
-    } else if (process.state === 'running') {
-      ctx.websocket.send(JSON.stringify({type:'signal', message:'attached to socket'}));
-      ctx.websocket.send(JSON.stringify({type:'processState', message:'running'}));
-      process.webSockets.add(ctx.websocket as any);
-    } else {
-      process.webSockets.add(ctx.websocket as any);
-      // run task
-      try {
-        process.state = 'running';
-        sendToAllClient(id, {type:'processState', message:'running'});
-        process.startedAt = new Date();
+// app.ws.use(Route.all('/ws/process/:id', async (ctx, id:string)=>{
+//   console.debug('processid=', id);
+//   const process = global.tasks[id];
+//     if (process){
+//       ctx.websocket.send(JSON.stringify({type:'signal', message:`socket open for task ${process.taskName}`}));
+//     } else {
+//       console.debug('no process');
+//       ctx.websocket.send(JSON.stringify({type:'signal', message:'process does not exist'}));
+//       ctx.websocket.close();
+//     }
+//     if (process.state === 'done') {
+//       ctx.websocket.send(JSON.stringify({type:'signal', message:'process already done'}));
+//       ctx.websocket.send(JSON.stringify({type:'processState', message:'done'}));
+//       ctx.websocket.close();
+//     } else if (process.state === 'error') {
+//       ctx.websocket.send(JSON.stringify({type:'signal', message:'process exited with an error'}));
+//       ctx.websocket.send(JSON.stringify({type:'processState', message:'error'}));
+//       ctx.websocket.close();
+//     } else if (process.state === 'running') {
+//       ctx.websocket.send(JSON.stringify({type:'signal', message:'attached to socket'}));
+//       ctx.websocket.send(JSON.stringify({type:'processState', message:'running'}));
+//       process.webSockets.add(ctx.websocket as any);
+//     } else {
+//       process.webSockets.add(ctx.websocket as any);
+//       // run task
+//       try {
+//         process.state = 'running';
+//         sendToAllClient(id, {type:'processState', message:'running'});
+//         process.startedAt = new Date();
 
-        const result = await runExe( //===================== run exe here
-          process,
-          null,
-          (outputObj) => {
-            if (outputObj && outputObj.type) {
-              process.result = outputObj.data;
-            }
-            let count = 0;
-            process.webSockets.forEach(ws => {
-              if (ws.readyState === ws.OPEN) {
-                ws.send(JSON.stringify(outputObj));
-                count++;
-              }
-            })
-            console.debug(`sent to ${count} client`);
-          },
-          (errMsg)=>{
-            sendToAllClient(id, {type:'log', message:errMsg});
-            console.error(errMsg);
+//         const result = await runExe( //===================== run exe here
+//           process,
+//           null,
+//           (outputObj) => {
+//             if (outputObj && outputObj.type) {
+//               process.result = outputObj.data;
+//             }
+//             let count = 0;
+//             process.webSockets.forEach(ws => {
+//               if (ws.readyState === ws.OPEN) {
+//                 ws.send(JSON.stringify(outputObj));
+//                 count++;
+//               }
+//             })
+//             console.debug(`sent to ${count} client`);
+//           },
+//           (errMsg)=>{
+//             sendToAllClient(id, {type:'log', message:errMsg});
+//             console.error(errMsg);
             
-          },
-          (subProcessInst)=>{
-            process.subProcessInst = subProcessInst;
-          }
-        );
-        process.state = 'done';
-        process.doneAt = new Date();
-        sendToAllClient(id, {type:'processState', message:'done'});
-        process.webSockets.forEach(ws => {if (ws.readyState === ws.OPEN) ws.close()});
-        process.webSockets.forEach(ws => {if (ws.readyState === ws.CLOSED) process.webSockets.delete(ws)});
-      } catch (err) {
-        process.state = 'error';
-        console.error(err);
-        sendToAllClient(id, {type:'processState', message:'error'});
-        ctx.websocket.close();
-        process.doneAt = new Date();
-      }
-    }
-}))
+//           },
+//           (subProcessInst)=>{
+//             process.subProcessInst = subProcessInst;
+//           }
+//         );
+//         process.state = 'done';
+//         process.doneAt = new Date();
+//         sendToAllClient(id, {type:'processState', message:'done'});
+//         process.webSockets.forEach(ws => {if (ws.readyState === ws.OPEN) ws.close()});
+//         process.webSockets.forEach(ws => {if (ws.readyState === ws.CLOSED) process.webSockets.delete(ws)});
+//       } catch (err) {
+//         process.state = 'error';
+//         console.error(err);
+//         sendToAllClient(id, {type:'processState', message:'error'});
+//         ctx.websocket.close();
+//         process.doneAt = new Date();
+//       }
+//     }
+// }))
 
 
 // ----------------------------------socket.io part----------------------------------------------
@@ -361,6 +332,7 @@ const server = http.createServer(app.callback());
 const io = socket(server);
 
 io.on('connection', (socket)=>{
+  socket.join('game');
   console.log('socket.io connection');
   socket.on('runTask', (id, params, callback)=>{
     for (let i=0;i<10;i++) {

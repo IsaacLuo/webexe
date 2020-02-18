@@ -17,6 +17,7 @@
   ],
   "include": [
       "src/**/*.ts",
-      "**/*.json", "conf.ts"
+      "src/**/*.tsx",
+      "**/*.json",
   ]
 }
