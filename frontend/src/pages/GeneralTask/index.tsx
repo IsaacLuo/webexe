@@ -122,8 +122,9 @@ class GeneralTask extends React.Component<IProps, IState> {
 
     this.socket = io(conf.backendURL);
     
-    this.socket.on('progress', (v:any)=>console.log(v))
+    this.socket.on('progress', (v:any)=>console.log('progress', v))
     this.socket.on('big-announcement', (v:any)=>console.log(v))
+    this.socket.on('state', (v:any)=>console.log('state:', v))
   }
 
   public render() {

@@ -24,6 +24,10 @@ const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
 const fs_mkdir = promisify(fs.mkdir);
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // import redis from 'redis'
 
 // let client = redis.createClient(6379, '127.0.0.1')
@@ -331,16 +335,24 @@ async (ctx:Ctx, next:Next)=> {
 const server = http.createServer(app.callback());
 const io = socket(server);
 
-io.on('connection', (socket)=>{
-  socket.join('game');
+io.on('connection', async (socket)=>{
   console.log('socket.io connection');
-  socket.on('runTask', (id, params, callback)=>{
+  socket.on('runTask', async (id, params, callback)=>{
+    console.log('runTask', id, params);
+    socket.join(id);
     for (let i=0;i<10;i++) {
-      socket.emit('progress', i*0.1);
+      await sleep(1000);
+      io.in(id).emit('progress', i*0.1);
     }
-    socket.emit('state', 'finish');
-    callback(12345);
-  })
+    console.log('emmit finish')
+    io.in(id).emit('state', 'finish');
+    callback(Date.now());
+  });
+
+  socket.on('attachProcess', async (processId)=>{
+    socket.join(processId);
+  });
+
 })
 
 // -----------------------------------------------------------------------------------------------
