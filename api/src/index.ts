@@ -24,6 +24,10 @@ const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
 const fs_mkdir = promisify(fs.mkdir);
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 // import redis from 'redis'
 
 // let client = redis.createClient(6379, '127.0.0.1')
@@ -331,16 +335,28 @@ async (ctx:Ctx, next:Next)=> {
 const server = http.createServer(app.callback());
 const io = socket(server);
 
-io.on('connection', (socket)=>{
-  socket.join('game');
-  console.log('socket.io connection');
-  socket.on('runTask', (id, params, callback)=>{
+io.of('/tasks').on('connection', async (socket)=>{
+  console.log('tasks:::::', socket.id);
+  socket.on('runTask', async (id, params, callback)=>{
+    socket.join('id');
     for (let i=0;i<10;i++) {
-      socket.emit('progress', i*0.1);
+      await sleep(1000);
+      socket.emit('progress', i*10);
     }
+    socket.emit('progress', 100);
     socket.emit('state', 'finish');
     callback(12345);
+    socket.disconnect(true);
   })
+})
+
+io.of('/taskMonitor').on('connection', async (socket)=>{
+  socket.join('taskMonitor');
+  console.log('taskMonitor:::::', socket.id);
+  const rooms = io.sockets.adapter.rooms;
+  // console.log(rooms)
+  socket.emit('clients', rooms);
+  socket.disconnect(true);
 })
 
 // -----------------------------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+/// <reference path="@types/index.d.ts" />
 import {IStoreState, TaskDefinition} from './types'
 // react-redux-router
 import * as React from 'react'
@@ -25,6 +26,7 @@ import TaskManager from './pages/TaskManager';
 import { Button } from 'element-react'
 import conf from './conf.json';
 import io from 'socket.io-client';
+import TaskMonitor from './pages/TaskMonitor';
 
 interface IProps {
   message:string,
@@ -69,6 +71,7 @@ class App extends React.Component<IProps, IState> {
           :
           <MyPanel>
             <Route path='/' exact={true} component={Dashboard} />
+            <Route path="/TaskMonitor" component={TaskMonitor}/>
             {availableTasks &&
               Object.keys(availableTasks).map(
                 (key,i)=>

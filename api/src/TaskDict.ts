@@ -2,6 +2,7 @@
 import uuid from 'uuid';
 import taskConf from './taskConf';
 import redis from 'redis'
+import conf from './conf.json'
 
 class TaskDict {
   private tasks:IProcessDict = {};

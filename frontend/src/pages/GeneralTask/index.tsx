@@ -120,10 +120,8 @@ class GeneralTask extends React.Component<IProps, IState> {
       params: this.generateDefaultParams(props.availableTasks[props.taskName]),
     };
 
-    this.socket = io(conf.backendURL);
-    
+    this.socket = io(conf.backendURL+'/tasks');
     this.socket.on('progress', (v:any)=>console.log(v))
-    this.socket.on('big-announcement', (v:any)=>console.log(v))
   }
 
   public render() {
