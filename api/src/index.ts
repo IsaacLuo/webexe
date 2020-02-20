@@ -335,28 +335,24 @@ async (ctx:Ctx, next:Next)=> {
 const server = http.createServer(app.callback());
 const io = socket(server);
 
-io.of('/tasks').on('connection', async (socket)=>{
-  console.log('tasks:::::', socket.id);
+io.on('connection', async (socket)=>{
+  console.log('socket.io connection');
   socket.on('runTask', async (id, params, callback)=>{
-    socket.join('id');
+    console.log('runTask', id, params);
+    socket.join(id);
     for (let i=0;i<10;i++) {
       await sleep(1000);
-      socket.emit('progress', i*10);
+      io.in(id).emit('progress', i*0.1);
     }
-    socket.emit('progress', 100);
-    socket.emit('state', 'finish');
-    callback(12345);
-    socket.disconnect(true);
-  })
-})
+    console.log('emmit finish')
+    io.in(id).emit('state', 'finish');
+    callback(Date.now());
+  });
 
-io.of('/taskMonitor').on('connection', async (socket)=>{
-  socket.join('taskMonitor');
-  console.log('taskMonitor:::::', socket.id);
-  const rooms = io.sockets.adapter.rooms;
-  // console.log(rooms)
-  socket.emit('clients', rooms);
-  socket.disconnect(true);
+  socket.on('attachProcess', async (processId)=>{
+    socket.join(processId);
+  });
+
 })
 
 // -----------------------------------------------------------------------------------------------
