@@ -105,7 +105,6 @@ const mapDispatchToProps = (dispatch :Dispatch) => ({
 })
 
 class GeneralTask extends React.Component<IProps, IState> {
-  private socket:SocketIOClient.Socket;
   public static getDerivedStateFromProps(props:IProps, state:IState) {
     return {
       ...state,
@@ -119,9 +118,6 @@ class GeneralTask extends React.Component<IProps, IState> {
       taskDefinition: props.availableTasks[props.taskName],
       params: this.generateDefaultParams(props.availableTasks[props.taskName]),
     };
-
-    this.socket = io(conf.backendURL+'/tasks');
-    this.socket.on('progress', (v:any)=>console.log(v))
   }
 
   public render() {
@@ -273,8 +269,8 @@ class GeneralTask extends React.Component<IProps, IState> {
 
   private startTask = () => {
     console.log(this.state.params);
-    // this.props.start(this.props.taskName, this.state.params);
-    this.socket.emit('runTask', 1,{a:2}, (n:number)=>console.log(n));
+    this.props.start(this.props.taskName, this.state.params);
+    // this.socket.emit('runTask', 1,{a:2}, (n:number)=>console.log(n));
   }
 
   private reset = () => {

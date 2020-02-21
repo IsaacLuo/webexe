@@ -1,3 +1,4 @@
+import io from 'socket.io-client';
 import {call, select, all, fork, put, take, takeLatest, takeEvery} from 'redux-saga/effects'
 import uploadFile from '../../common/uploadFile'
 import { eventChannel } from 'redux-saga'
@@ -23,7 +24,7 @@ import{
   WS_DISCONNECTED,
   SERVER_MESSAGE,
   SERVER_RESULT,
-  SET_WS,
+  SET_SOCKET,
   HEARTBEAT,
   END_WS,
   SET_CLIENT_ID,
@@ -33,6 +34,8 @@ import{
   UPLOAD_FILE_PARAMS,
 } from './actions'
 import Axios from 'axios';
+// import socketIoWildcard from 'socketio-wildcard'
+// const wildcardPatch = socketIoWildcard(io.Manager)
 
 function* heartBeat(action: IAction) {
   const ws = action.data;
@@ -44,26 +47,17 @@ function* heartBeat(action: IAction) {
 }
 
 
-function initWebSocket(ws:WebSocket) {
+function monitorSocket(socket:SocketIOClient.Socket) {
+  // wildcardPatch(socket);
   return eventChannel( emitter => {
-    ws.onmessage = event => {
-      console.debug('server ws: '+ event.data);
-      try {
-        const serverAction = JSON.parse(event.data);
-        emitter(serverAction);
-      } catch (err) {
-        console.error(event.data);
-      }
-    }
-    ws.onopen = () => {
-      console.log('websocket open');
-    }
-
-    ws.onclose = () => {
-      console.log('websocket closed');
-      emitter({type:WS_DISCONNECTED});
-    }
-
+    console.log('eventChannel');
+    const types = ['progress', 'state', 'result'];
+    types.forEach(type=>{
+      socket.on(type,(data)=>{
+        console.log('*', type, data)
+        emitter({type, data});
+      })
+    })
     return () => {
       console.log('Socket off')
     }
@@ -80,11 +74,26 @@ function* startTask(action:IAction) {
     const {processId} = newTaskContent.data;
     yield put({type:SET_PROCESS_ID, data:processId});
 
-    // 2. create websocket to receive progress
-    const webSocket = new WebSocket(`${config.backendURL}/ws/process/${processId}`);
-    const channel = yield call(initWebSocket, webSocket);
-    yield put({type:SET_WS, data: webSocket});
-    // yield put({type:HEARTBEAT, data:webSocket});
+    // 2. use socket.io
+    let socket:SocketIOClient.Socket;
+    if (!pageState.socket) {
+      socket = io(config.backendURL + '/tasks');
+      yield put({type:SET_SOCKET, data:socket});
+      console.log('new socket')
+    } else {
+      socket = pageState.socket;
+      console.log('reuse socket')
+    }
+
+    console.log('hhahh');
+    yield call(socket.emit, 'startTask', processId, (n:any)=>{
+      console.log(n);
+    });
+
+    const channel = yield call(monitorSocket, socket);
+
+
+
     while (true) {
       const serverAction = yield take(channel)
       console.debug('messageType', serverAction.type)
@@ -95,80 +104,103 @@ function* startTask(action:IAction) {
             data: serverAction.message,
           });
           break;
-
         case 'progress':
             yield put({
               type: PROGRESS,
-              data: {message: serverAction.message, progress:Math.ceil(serverAction.progress*100)},
-            });
-            yield put({
-              type: SET_PROCESS_SIGNAL,
-              data: serverAction.message,
+              data: {message: serverAction.message, progress:Math.ceil(serverAction.progress)},
             });
             break;
-
-        case 'log':
-            yield put({
-              type: SET_PROCESS_LOG,
-              data: serverAction.message,
-            });
-            break;
-
-        case 'result':
-            yield put({
-              type: SERVER_RESULT,
-              data: serverAction.data,
-            });
-            yield put({
-              type: SET_PROCESS_LOG,
-              data: serverAction.message,
-            });
-            break;
-
-        case 'initialize':
-          yield put({
-              type: SET_CLIENT_ID,
-              data: serverAction.data.clientId,
-            });
-            break;
-        case 'prompt':
-          yield put({
-              type: PROGRESS,
-              data: {message: 'started', progress:0},
-            });
-          break;
-        case 'queueing':
-          yield put({
-            type: SERVER_MESSAGE,
-            data: {message: serverAction.message},
-          });
-          break;
-        
-
-        case 'finish':
-          yield put({
-            type: FINISH_TASK,
-          });
-          break;
-        case 'rejected':
-          yield put({
-            type: REJECT_TASK,
-            data: {message: serverAction.message},
-          });
-          break;
-        case 'message':
-          yield put({
-            type: SERVER_MESSAGE,
-            data: {message: serverAction.message},
-          });
-          break;
       }
     }
-  } catch (err) {
+  } catch(err) {
 
   }
-
 }
+
+    // // 2. create websocket to receive progress
+    // const webSocket = new WebSocket(`${config.backendURL}/ws/process/${processId}`);
+    // const channel = yield call(initWebSocket, webSocket);
+    // yield put({type:SET_WS, data: webSocket});
+    // // yield put({type:HEARTBEAT, data:webSocket});
+    // while (true) {
+    //   const serverAction = yield take(channel)
+    //   console.debug('messageType', serverAction.type)
+    //   switch (serverAction.type) {
+    //     case 'signal':
+    //       yield put({
+    //         type: SET_PROCESS_SIGNAL,
+    //         data: serverAction.message,
+    //       });
+    //       break;
+
+    //     case 'progress':
+    //         yield put({
+    //           type: PROGRESS,
+    //           data: {message: serverAction.message, progress:Math.ceil(serverAction.progress*100)},
+    //         });
+    //         yield put({
+    //           type: SET_PROCESS_SIGNAL,
+    //           data: serverAction.message,
+    //         });
+    //         break;
+
+    //     case 'log':
+    //         yield put({
+    //           type: SET_PROCESS_LOG,
+    //           data: serverAction.message,
+    //         });
+    //         break;
+
+    //     case 'result':
+    //         yield put({
+    //           type: SERVER_RESULT,
+    //           data: serverAction.data,
+    //         });
+    //         yield put({
+    //           type: SET_PROCESS_LOG,
+    //           data: serverAction.message,
+    //         });
+    //         break;
+
+    //     case 'initialize':
+    //       yield put({
+    //           type: SET_CLIENT_ID,
+    //           data: serverAction.data.clientId,
+    //         });
+    //         break;
+    //     case 'prompt':
+    //       yield put({
+    //           type: PROGRESS,
+    //           data: {message: 'started', progress:0},
+    //         });
+    //       break;
+    //     case 'queueing':
+    //       yield put({
+    //         type: SERVER_MESSAGE,
+    //         data: {message: serverAction.message},
+    //       });
+    //       break;
+        
+
+    //     case 'finish':
+    //       yield put({
+    //         type: FINISH_TASK,
+    //       });
+    //       break;
+    //     case 'rejected':
+    //       yield put({
+    //         type: REJECT_TASK,
+    //         data: {message: serverAction.message},
+    //       });
+    //       break;
+    //     case 'message':
+    //       yield put({
+    //         type: SERVER_MESSAGE,
+    //         data: {message: serverAction.message},
+    //       });
+    //       break;
+    //   }
+    // }
 
 function* onWebsocketDisconnected() {
   Notification.error('disconnected from the server');
@@ -206,5 +238,4 @@ export default function* watchTestLongTask() {
   yield takeLatest(WS_DISCONNECTED, onWebsocketDisconnected);
   yield takeEvery(HEARTBEAT, heartBeat);
   yield takeLatest(UPLOAD_FILE_PARAMS, onUploadFileParams);
-  
 }

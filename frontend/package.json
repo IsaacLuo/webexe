@@ -6,6 +6,7 @@
     "@types/history": "^4.7.3",
     "@types/react-redux": "^7.1.2",
     "@types/socket.io-client": "^1.4.32",
+    "@types/socketio-wildcard": "^2.0.3",
     "@types/webpack": "^4.39.1",
     "@types/webpack-env": "^1.14.0",
     "@types/websocket": "^0.0.40",
@@ -26,6 +27,7 @@
     "redux-react-hook": "^4.0.1",
     "redux-saga": "^1.0.5",
     "socket.io-client": "^2.3.0",
+    "socketio-wildcard": "^2.0.0",
     "styled-components": "^4.3.2",
     "xlsx": "^0.15.1"
   },

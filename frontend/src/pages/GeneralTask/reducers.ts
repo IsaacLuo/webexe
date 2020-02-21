@@ -2,19 +2,13 @@
  * @file test long task reducers
  */
 
-import {
-  IAction,
-  IGeneralTaskState,
-  } from '../../types'
-
 import{
   SERVER_MESSAGE,
   PROGRESS,
   FINISH_TASK,
   ABORT_TASK,
-  CREATE_WS,
   START_TASK,
-  SET_WS,
+  SET_SOCKET,
   SET_CLIENT_ID,
   SET_PROCESS_ID,
   SET_PROCESS_SIGNAL,
@@ -34,13 +28,13 @@ export default function reducer(state:IGeneralTaskState  = {
   signalLog: [],
   outputLog: [],
   result: undefined,
+  socket: undefined,
 }, action: IAction) {
   switch (action.type) {
-    case SET_WS:
+    case SET_SOCKET:
       return {
         ...state,
-        taskStatus: 'ready',
-        ws: action.data,
+        socket:action.data,
       }
     case SET_CLIENT_ID:
       return {

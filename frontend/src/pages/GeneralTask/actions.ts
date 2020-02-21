@@ -4,7 +4,7 @@ const TASK_APPENDIX = '_GT';
 export const CREATE_WS = 'CREATE_WS' + TASK_APPENDIX;
 
 // set ws to store
-export const SET_WS = 'SET_WS' + TASK_APPENDIX;
+export const SET_SOCKET = 'SET_SOCKET' + TASK_APPENDIX;
 
 // websocket disconnected
 export const END_WS = 'END_WS' + TASK_APPENDIX;

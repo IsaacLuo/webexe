@@ -44,6 +44,7 @@ declare interface IGeneralTaskState {
   taskStatus: TaskStatus,
   showProgressBar: boolean,
   ws?: WebSocket,
+  socket?: SocketIOClient.Socket,
   clientId: string,
   enableRunButton: boolean,
 

@@ -5,14 +5,18 @@ import styled from 'styled-components';
 import conf from 'conf.json';
 import io from 'socket.io-client'
 
-let socket;
 
-const MainPage = () => {
-  if (!socket) {
+
+const TaskMonitor = () => {
+  let socket;
+  useEffect(()=>{
     socket = io(conf.backendURL+'/taskMonitor');
-  }
-  socket.on('clients', (v:any)=>console.log(v))
+    socket.emit('getTasks', (v:any)=>console.log(v));
+    socket.on('taskUpdate', (v:any)=>console.log(v));
+    
+  },[]);
+
   return <div>hello</div>
 }
 
-export default MainPage;
+export default TaskMonitor;

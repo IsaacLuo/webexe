@@ -44,6 +44,7 @@ export interface IGeneralTaskState {
   taskStatus: TaskStatus,
   showProgressBar: boolean,
   ws?: WebSocket,
+  socket?: any,
   clientId: string,
   enableRunButton: boolean,
 

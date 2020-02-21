@@ -1461,10 +1461,25 @@
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
-"@types/socket.io-client@^1.4.32":
+"@types/socket.io-client@*", "@types/socket.io-client@^1.4.32":
   version "1.4.32"
   resolved "https://registry.yarnpkg.com/@types/socket.io-client/-/socket.io-client-1.4.32.tgz#988a65a0386c274b1c22a55377fab6a30789ac14"
   integrity sha512-Vs55Kq8F+OWvy1RLA31rT+cAyemzgm0EWNeax6BWF8H7QiiOYMJIdcwSDdm5LVgfEkoepsWkS+40+WNb7BUMbg==
+
+"@types/socket.io@*":
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/@types/socket.io/-/socket.io-2.1.4.tgz#674e7bc193c5ccdadd4433f79f3660d31759e9ac"
+  integrity sha512-cI98INy7tYnweTsUlp8ocveVdAxENUThO0JsLSCs51cjOP2yV5Mqo5QszMDPckyRRA+PO6+wBgKvGvHUCc23TQ==
+  dependencies:
+    "@types/node" "*"
+
+"@types/socketio-wildcard@^2.0.3":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@types/socketio-wildcard/-/socketio-wildcard-2.0.3.tgz#978e0ffb8ea763d014a5f2744e101d3e476412a4"
+  integrity sha512-ei9X6FK8obWE6bZMuLs9jX5tXPIfchr3reeLdLff0H2qonYWEmYy952yq1/5tS9Glh+U9kkBEJMYXucx4ghRww==
+  dependencies:
+    "@types/socket.io" "*"
+    "@types/socket.io-client" "*"
 
 "@types/source-list-map@*":
   version "0.1.2"
@@ -10453,6 +10468,11 @@ socket.io-parser@~3.3.0:
     component-emitter "1.2.1"
     debug "~3.1.0"
     isarray "2.0.1"
+
+socketio-wildcard@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/socketio-wildcard/-/socketio-wildcard-2.0.0.tgz#2466e832276b19163563bee772388747f912475b"
+  integrity sha1-JGboMidrGRY1Y77ncjiHR/kSR1s=
 
 sockjs-client@1.4.0:
   version "1.4.0"

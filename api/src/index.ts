@@ -19,6 +19,7 @@ import mimetype from 'mime-types';
 import http from 'http';
 import socket from 'socket.io';
 import TaskDict from './TaskDict';
+import cookie from 'cookie'
 
 const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
@@ -335,11 +336,25 @@ async (ctx:Ctx, next:Next)=> {
 const server = http.createServer(app.callback());
 const io = socket(server);
 
-io.on('connection', async (socket)=>{
-  console.log('socket.io connection');
-  socket.on('runTask', async (id, params, callback)=>{
-    console.log('runTask', id, params);
+function socketUserMustBeUser (socket) {
+      const cookies = cookie.parse(socket.handshake.headers.cookie);
+    console.log(cookies)
+}
+
+io.of('/tasks').on('connection', async (socket)=>{
+  console.log('connected /tasks');
+  socket.on('startTask', async (id, callback)=>{
+    console.log('startTask', id);
     socket.join(id);
+    const task = global.taskDict.getTask(id);
+    if(!task) {
+      socket.disconnect();
+      return;
+    }
+
+    task.state = 'running';
+    task.startedAt = new Date();
+    io.of('/taskMonitor').emit('taskUpdate', task);
     for (let i=0;i<10;i++) {
       await sleep(1000);
       io.in(id).emit('progress', i*0.1);
@@ -347,6 +362,23 @@ io.on('connection', async (socket)=>{
     console.log('emmit finish')
     io.in(id).emit('state', 'finish');
     callback(Date.now());
+    socket.disconnect();
+  });
+
+  socket.on('disconnect', async (reason)=>{
+
+  });
+
+  socket.on('attachProcess', async (processId)=>{
+    socket.join(processId);
+  });
+
+})
+
+io.of('/taskMonitor').on('connection', async (socket)=>{
+  socket.on('getTasks', async (callback)=>{
+    const tasks = global.taskDict.getAllTasks();
+    callback(tasks);
   });
 
   socket.on('attachProcess', async (processId)=>{
