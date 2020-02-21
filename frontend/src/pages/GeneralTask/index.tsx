@@ -129,12 +129,9 @@ class GeneralTask extends React.Component<IProps, IState> {
     } = this.props;
 
     const {taskDefinition, params} = this.state;
-
     if(taskDefinition) {
       const form = this.generateParamsForm(taskDefinition);
-      
       const paramMissing = taskDefinition.params.some((v:any)=>v.essential === true && params[v.name] === undefined)
-      console.log('testing params', taskDefinition.params, params, paramMissing)
     return (
       <MyPanel>
         <h1>{taskDefinition.name}</h1>

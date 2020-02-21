@@ -8,12 +8,10 @@ import{
   FINISH_TASK,
   ABORT_TASK,
   START_TASK,
-  SET_SOCKET,
   SET_CLIENT_ID,
   SET_PROCESS_ID,
   SET_PROCESS_SIGNAL,
   SET_PROCESS_LOG,
-  WS_DISCONNECTED,
   SERVER_RESULT,
 } from './actions'
 
@@ -31,11 +29,7 @@ export default function reducer(state:IGeneralTaskState  = {
   socket: undefined,
 }, action: IAction) {
   switch (action.type) {
-    case SET_SOCKET:
-      return {
-        ...state,
-        socket:action.data,
-      }
+    
     case SET_CLIENT_ID:
       return {
         ...state,
@@ -53,8 +47,7 @@ export default function reducer(state:IGeneralTaskState  = {
       return {
         ...state,
         taskStatus: 'running',
-        message: action.data.message,
-        progress: action.data.progress,
+        progress: action.data,
       }
 
     case SERVER_MESSAGE:
@@ -98,11 +91,6 @@ export default function reducer(state:IGeneralTaskState  = {
         ...state,
         outputLog: [...state.outputLog, {time: new Date(), text: action.data}],
       }
-    case WS_DISCONNECTED:
-        return {
-          ...state,
-          outputLog: [...state.outputLog, {time: new Date(), text: 'disconnected from server'}],
-        }
 
   }
   return state;

@@ -336,12 +336,7 @@ async (ctx:Ctx, next:Next)=> {
 const server = http.createServer(app.callback());
 const io = socket(server);
 
-function socketUserMustBeUser (socket) {
-      const cookies = cookie.parse(socket.handshake.headers.cookie);
-    console.log(cookies)
-}
-
-io.of('/tasks').on('connection', async (socket)=>{
+io.on('connection', async (socket)=>{
   console.log('connected /tasks');
   socket.on('startTask', async (id, callback)=>{
     console.log('startTask', id);
@@ -354,19 +349,26 @@ io.of('/tasks').on('connection', async (socket)=>{
 
     task.state = 'running';
     task.startedAt = new Date();
+    io.in(id).emit('state', task.state);
     io.of('/taskMonitor').emit('taskUpdate', task);
     for (let i=0;i<10;i++) {
       await sleep(1000);
-      io.in(id).emit('progress', i*0.1);
+      io.in(id).emit('progress', (i+1)*10);
     }
     console.log('emmit finish')
-    io.in(id).emit('state', 'finish');
+    task.state = 'done';
+    task.doneAt = new Date();
+    io.in(id).emit('state', task.state);
     callback(Date.now());
     socket.disconnect();
   });
 
-  socket.on('disconnect', async (reason)=>{
+  socket.on('abort', async(processId)=>{
+    socket.leave(processId);
+  })
 
+  socket.on('disconnect', async (reason)=>{
+    console.log('socket disconnected');
   });
 
   socket.on('attachProcess', async (processId)=>{

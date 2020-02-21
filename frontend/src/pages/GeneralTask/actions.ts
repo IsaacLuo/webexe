@@ -1,22 +1,12 @@
 const TASK_APPENDIX = '_GT';
 
-// user starts the task
-export const CREATE_WS = 'CREATE_WS' + TASK_APPENDIX;
+// received progress information from server
+export const PROGRESS = 'PROGRESS' + TASK_APPENDIX;
 
-// set ws to store
-export const SET_SOCKET = 'SET_SOCKET' + TASK_APPENDIX;
-
-// websocket disconnected
-export const END_WS = 'END_WS' + TASK_APPENDIX;
-
-// websocket disconnected
-export const WS_DISCONNECTED = 'WS_DISCONNECTED' + TASK_APPENDIX;
+export const SET_PROCESS_STATE = 'SET_PROCESS_STATE' + TASK_APPENDIX;
 
 // user starts the task
 export const START_TASK = 'START' + TASK_APPENDIX;
-
-// received progress information from server
-export const PROGRESS = 'PROGRESS' + TASK_APPENDIX;
 
 // server sents a message to client
 export const SERVER_MESSAGE = 'SERVER_MESSAGE' + TASK_APPENDIX;
@@ -32,8 +22,6 @@ export const REJECT_TASK = 'REJECT' + TASK_APPENDIX;
 
 // user abort the task
 export const ABORT_TASK= 'ABORT' + TASK_APPENDIX;
-
-export const HEARTBEAT = 'HEARTBEAT' + TASK_APPENDIX;
 
 export const SET_CLIENT_ID = 'SET_CLIENT_ID' + TASK_APPENDIX;
 
