@@ -38,7 +38,7 @@ declare interface IProcess {
   program: string;
   params: string[];
   taskName: string;
-  state: 'ready'| 'running' | 'done' | 'error';
+  state: 'ready'| 'running' | 'done' | 'error' | 'aborted';
   result: any;
   createdAt?: Date;
   startedAt?: Date;

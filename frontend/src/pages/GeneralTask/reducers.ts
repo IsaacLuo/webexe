@@ -13,6 +13,8 @@ import{
   SET_PROCESS_SIGNAL,
   SET_PROCESS_LOG,
   SERVER_RESULT,
+  SERVER_LOG,
+  SET_PROCESS_STATE,
 } from './actions'
 
 export default function reducer(state:IGeneralTaskState  = {
@@ -43,18 +45,27 @@ export default function reducer(state:IGeneralTaskState  = {
         signalLog: [],
         outputLog: [],
       }
+      
     case PROGRESS:
       return {
         ...state,
         taskStatus: 'running',
         progress: action.data,
+        message: action.message,
       }
 
-    case SERVER_MESSAGE:
+    case SET_PROCESS_STATE:
       return {
         ...state,
-        message: action.data.message,
+        message: action.data,
       }
+    case SERVER_RESULT:
+      return {
+        ...state,
+        result: action.data,
+        message: action.message,
+      }
+    
     case FINISH_TASK:
       return {
         ...state,
@@ -69,24 +80,20 @@ export default function reducer(state:IGeneralTaskState  = {
         message: 'aborted',
         enableRunButton: true,
       }
-    case SERVER_RESULT:
-      return {
-        ...state,
-        result: action.data,
-      }
+    
 
     case SET_PROCESS_ID:
       return {
         ...state,
         processId: action.data,
       }
-    case SET_PROCESS_SIGNAL:
+    case SERVER_LOG:
       return {
         ...state,
-        message: action.data,
         signalLog: [...state.signalLog, {time: new Date(), text: action.data}],
       }
-    case SET_PROCESS_LOG:
+  
+    case SERVER_MESSAGE:
       return {
         ...state,
         outputLog: [...state.outputLog, {time: new Date(), text: action.data}],

@@ -1,5 +1,5 @@
 import * as childProcess from 'child_process'
-import { IProcess } from './types';
+
 
 const readline = require('readline');
 
@@ -31,14 +31,14 @@ export function runExe (
     })
 
     subProcess.stderr.on('data', (data:Buffer) => {
-      // console.log(data.toString());
+      console.log(data.toString());
       if (onStdErr) {
         onStdErr(data.toString());
       }
     });
     
     subProcess.on('close', (code) => {
-      // console.debug('finish python', code);
+      console.debug('finish python', code);
       if (code === 0) {
         // resolve(allObjects);
         resolve(0);

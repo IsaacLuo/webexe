@@ -3,6 +3,7 @@ const TASK_APPENDIX = '_GT';
 // received progress information from server
 export const PROGRESS = 'PROGRESS' + TASK_APPENDIX;
 
+
 export const SET_PROCESS_STATE = 'SET_PROCESS_STATE' + TASK_APPENDIX;
 
 // user starts the task
@@ -10,6 +11,8 @@ export const START_TASK = 'START' + TASK_APPENDIX;
 
 // server sents a message to client
 export const SERVER_MESSAGE = 'SERVER_MESSAGE' + TASK_APPENDIX;
+// server sents a message to client
+export const SERVER_LOG = 'SERVER_LOG' + TASK_APPENDIX;
 
 // server sents a result to client
 export const SERVER_RESULT = 'SERVER_RESULT' + TASK_APPENDIX;

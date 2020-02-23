@@ -1,6 +1,7 @@
 declare interface IAction {
   type: string,
   data: any,
+  [index: string]: string,
 }
 
 declare interface IFileUploadAction extends IAction{

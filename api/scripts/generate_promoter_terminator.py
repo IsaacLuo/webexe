@@ -14,7 +14,7 @@ terminator_length = int(sys.argv[3])
 
 ext = os.path.splitext(filename)[1]
 output_filename = webexe.random_string() + ext
-webexe.log('start task')
+webexe.log('start task\npromoter terminator')
 
 def read_gff_json(gff_json):
     if 'seqInfos' not in gff_json and 'fasta' in gff_json:
@@ -27,8 +27,13 @@ def read_gff_json(gff_json):
         original_records = gff_json['records']
         new_records = []
         records_len = len(original_records)
+        last_progress = 0
         for i, record in enumerate(original_records):
-            webexe.progress(0.4 * i/records_len, 'doing {}/{}'.format(i, records_len))
+            current_progress = 40 * i // records_len
+            if current_progress > last_progress:
+                webexe.progress(current_progress, 'doing {}/{}'.format(i, records_len))
+                last_progress = current_progress
+
             if record['featureType'] == 'gene':
                 start = record['start']
                 end = record['end']
@@ -151,7 +156,7 @@ def read_gff_json(gff_json):
                             'createdBy': 'cailab-webexe'
                         }
                         })
-        webexe.progress(0.4, 'merging')
+        webexe.progress(40, 'merging')
         #merge sort
         result = []
         original_record_len = len(original_records)
@@ -182,7 +187,7 @@ def read_gff_json(gff_json):
     else:
         raise Exception('cannot find records in this file')
 
-webexe.progress(0.0, 'start')
+webexe.progress(0, 'start')
 try:
     with open(filename, 'r') as f_src, open('results/' + output_filename,'w') as f_dst:
         line_count=0
@@ -190,14 +195,15 @@ try:
         if 'fileType' in src_json:
             if src_json['fileType'] == 'cailab_gff_json':
                 new_json = read_gff_json(src_json)
-                webexe.progress(0.8, 'dumping')
+                webexe.progress(80, 'dumping')
                 json.dump(new_json, f_dst)
             else:
                 raise Exception('unkown file type')
         else:
             raise Exception('unkown file type')
-    webexe.progress(1.0, 'finish')
+    webexe.progress(100, 'finish')
     webexe.result({'files':[{'name':'output'+ext, 'url':output_filename}]},'finish')
 except Exception as err:
     webexe.abort({}, str(err))
-    print(err, file=sys.stderr)
+    print(str(err), file=sys.stderr)
+    raise err

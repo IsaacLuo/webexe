@@ -22,6 +22,9 @@ import{
   SET_PROCESS_ID,
   SET_PROCESS_STATE,
   UPLOAD_FILE_PARAMS,
+  SERVER_MESSAGE,
+  SERVER_RESULT,
+  SERVER_LOG,
 } from './actions'
 import Axios from 'axios';
 // import socketIoWildcard from 'socketio-wildcard'
@@ -30,7 +33,7 @@ import Axios from 'axios';
 function monitorSocket(socket:SocketIOClient.Socket) {
   // wildcardPatch(socket);
   return eventChannel( emitter => {
-    const types = ['progress', 'state', 'result'];
+    const types = ['message', 'progress', 'state', 'result', 'stderr', 'abort'];
     types.forEach(type=>{
       socket.on(type,(data)=>{
         // console.log('*', type, data)
@@ -65,7 +68,14 @@ function* startTask(action:IAction) {
     while (true) {
       const serverAction = yield take(channel)
       // console.debug('messageType', serverAction.type)
+      console.log(serverAction);
       switch (serverAction.type) {
+        case 'message':
+            yield put({
+              type: SERVER_MESSAGE,
+              data: serverAction.data,
+            });
+            break;
         case 'progress':
             yield put({
               type: PROGRESS,
@@ -75,8 +85,27 @@ function* startTask(action:IAction) {
         case 'state':
           yield put({
             type: SET_PROCESS_STATE,
+            data: serverAction.data,
+          })
+          break;
+        case 'result':
+          yield put({
+            type: SERVER_RESULT,
+            data: serverAction.data,
+          })
+          break;
+        case 'stderr':
+          yield put({
+            type: SERVER_LOG,
             data: serverAction.data
           })
+          break;
+        case 'abort':
+          yield put({
+            type: ABORT_TASK,
+            data: serverAction.data,
+          })
+          break;
       }
     }
   } catch(err) {

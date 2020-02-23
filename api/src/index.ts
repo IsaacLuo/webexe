@@ -351,19 +351,43 @@ io.on('connection', async (socket)=>{
     task.startedAt = new Date();
     io.in(id).emit('state', task.state);
     io.of('/taskMonitor').emit('taskUpdate', task);
-    for (let i=0;i<10;i++) {
-      await sleep(1000);
-      io.in(id).emit('progress', (i+1)*10);
+    try {
+      const result = await runExe( //===================== run exe here
+            task,
+            null,
+            (outputObj) => {
+              io.in(id).emit(outputObj.type, outputObj.data);
+              if(outputObj.message) {
+                io.in(id).emit('stderr', outputObj.message);
+              }
+            },
+            (errMsg)=>{
+              io.in(id).emit('stderr', errMsg);
+              
+            }
+          );
+      task.state = 'done';
+      task.doneAt = new Date();
+      io.in(id).emit('progress', 100);
+      io.in(id).emit('state', task.state);
+
+      io.of('/taskMonitor').emit('taskUpdate', task);
+      callback(Date.now());
+    } catch (err) {
+      task.state = 'aborted';
+      io.in(id).emit('abort', task.state);
     }
-    console.log('emmit finish')
-    task.state = 'done';
-    task.doneAt = new Date();
-    io.in(id).emit('state', task.state);
-    callback(Date.now());
     socket.disconnect();
   });
 
   socket.on('abort', async(processId)=>{
+    const task = global.taskDict.getTask(processId);
+    if(!task) {
+      socket.disconnect();
+      return;
+    }
+    task.state='aborted';
+    io.of('/taskMonitor').emit('taskUpdate', task);
     socket.leave(processId);
   })
 
