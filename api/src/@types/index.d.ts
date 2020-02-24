@@ -34,7 +34,7 @@ declare interface ICustomState {
 
 declare interface IProcess {
   processId: string;
-  subProcessInst?: ChildProcessWithoutNullStreams;
+  subProcessInst?: any;
   program: string;
   params: string[];
   taskName: string;

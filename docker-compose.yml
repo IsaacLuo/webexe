@@ -1,9 +1,9 @@
 version: '3.0'
 services:
   api:
-    build: ./api-server
+    build: ./api
     ports:
-      - "12800:8000"
+      - "12800:3000"
     working_dir: /app
     command: ['yarn', 'run', 'production']
     restart: always
