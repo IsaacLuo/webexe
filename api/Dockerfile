@@ -5,6 +5,7 @@ ADD ./package.json .
 ADD ./yarn.lock .
 RUN yarn install
 ADD . .
-RUN yarn build
+RUN yarn run build
+ADD .env build/.env
 CMD ["yarn", "run production"]
 

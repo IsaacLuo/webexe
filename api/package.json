@@ -41,7 +41,7 @@
     "start": "ts-node src/index.ts",
     "increase-memory-limit": "cross-env LIMIT=4096 increase-memory-limit",
     "build": "cross-env NODE_ENV=production tsc",
-    "production": "cross-env NODE_ENV=production node build/src/index.js",
+    "production": "cross-env NODE_ENV=production node build/index.js",
     "dev": "cross-env NODE_ENV=development node ./node_modules/nodemon/bin/nodemon.js",
     "debug": "node ./node_modules/nodemon/bin/nodemon.js --inspect",
     "importDB": "ts-node src/script/importData.ts",

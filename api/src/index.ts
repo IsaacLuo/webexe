@@ -418,7 +418,6 @@ io.of('/taskMonitor').on('connection', async (socket)=>{
 // -----------------------------------------------------------------------------------------------
 
 app.use(router.routes());
-// app.listen(conf.port, '0.0.0.0');
+console.log('process.env.PORT = ', process.env.PORT);
 server.listen(process.env.PORT);
-
 log4js.getLogger().info(`webexe start listening at ${process.env.PORT}`);
