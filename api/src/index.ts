@@ -25,6 +25,8 @@ const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
 const fs_mkdir = promisify(fs.mkdir);
 
+require('dotenv').config();
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -417,6 +419,6 @@ io.of('/taskMonitor').on('connection', async (socket)=>{
 
 app.use(router.routes());
 // app.listen(conf.port, '0.0.0.0');
-server.listen(conf.port);
+server.listen(process.env.PORT);
 
-log4js.getLogger().info(`webexe start listening at ${conf.port}`);
+log4js.getLogger().info(`webexe start listening at ${process.env.PORT}`);

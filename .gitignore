@@ -10,3 +10,5 @@
 /frontend/conf.json
 /frontend/nohup.out
 /frontend/src/conf.json
+/.env
+/api/.env
