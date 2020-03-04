@@ -23,7 +23,6 @@ import cookie from 'cookie'
 
 const { promisify } = require('util');
 const fs_exists = promisify(fs.exists);
-const fs_mkdir = promisify(fs.mkdir);
 const fsPromises = fs.promises;
 
 require('dotenv').config();
@@ -232,7 +231,6 @@ async (ctx:Ctx, next:Next)=> {
   const filePath = `${conf.attachmentPath}/${todayStr}/${Math.random().toString(36).substring(2)}_${file.name}`;
   if (!exists) {
     await fsPromises.mkdir(`${conf.attachmentPath}/${todayStr}`, { recursive: true })
-    // await fs_mkdir(`${conf.attachmentPath}/${todayStr}`);
   }
   const upStream = fs.createWriteStream(filePath);
   reader.pipe(upStream);
