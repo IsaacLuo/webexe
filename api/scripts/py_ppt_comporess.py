@@ -20,7 +20,7 @@ def main(ppt_file_name, output_filename):
     webexe.log('prara {} {}'.format(ppt_file_name, output_filename))
     tmp_dir = os.path.abspath(conf.TMP_DIR)
     tmp_dir = os.path.join(tmp_dir, os.path.split(ppt_file_name)[1]+'_'+datetime.datetime.now().strftime('%Y%m%d%H%M%S.%f'))
-    os.mkdir(tmp_dir)
+    os.mkdirs(tmp_dir, exist_ok=True)
     webexe.progress(message = 'extracting files', progress=0.1)
     with zipfile.ZipFile(ppt_file_name, 'r') as zip_ref:
         zip_ref.extractall(tmp_dir)
