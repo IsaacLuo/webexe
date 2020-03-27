@@ -27,3 +27,20 @@ def abort(data, message=''):
 def random_string(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
+
+class ProgressCounter:
+    def __init__(self, min_val, max_val, total, step=1):
+        self.min_val = min_val
+        self.max_val = max_val
+        self.step = step
+        self.count_times = 0
+        self.total = total
+        self.last_count = min_val
+    
+    def count(self, message, progress_step=1):
+        self.count_times += progress_step
+        current_count = self.count_times * (self.max_val - self.min_val) // self.total + self.min_val
+        if current_count >= self.last_count + self.step:
+            self.last_count = current_count
+            progress(current_count, message)
+            
