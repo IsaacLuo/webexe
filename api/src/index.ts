@@ -374,7 +374,7 @@ io.on('connection', async (socket)=>{
       io.in(id).emit('state', task.state);
 
       io.of('/taskMonitor').emit('taskUpdate', task);
-      callback(Date.now());
+      callback(result);
     } catch (err) {
       task.state = 'aborted';
       io.in(id).emit('abort', task.state);

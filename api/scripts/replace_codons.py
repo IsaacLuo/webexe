@@ -30,7 +30,10 @@ if args.output_file_name:
 else:
     output_file_name = webexe.random_string() + ext
 
-webexe.log('start task\nreplace codons\n {args.convert_rules} {} {}')
+# webexe.log('start task\nreplace codons\n {} {} {}'.format())
+
+if len(args.convert_rules) == 1 and args.convert_rules[0].find(' ')>0:
+    args.convert_rules = args.convert_rules[0].split(' ')
 
 def rc(seq):
     d = {'a':'t', 't':'a', 'c':'g', 'g':'c', 'A':'T', 'T':'A', 'C':'G', 'G':'C', 'n':'n', 'N':'N'}
