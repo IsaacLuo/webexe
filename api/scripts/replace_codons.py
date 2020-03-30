@@ -11,9 +11,9 @@ import argparse
 
 import webexe
 
-sys.argv.append( r'C:\Users\luoyi\Desktop\chr4.json')
-sys.argv.append('TAG:TAA')
-sys.argv.append('TGA:TAA')
+# sys.argv.append( r'C:\Users\luoyi\Desktop\chr4.json')
+# sys.argv.append('TAG:TAA')
+# sys.argv.append('TGA:TAA')
 
 parser = argparse.ArgumentParser(description='replace codons from one to another by giving rules')
 parser.add_argument(dest='input_file_name', help='input filename in gff.json format')
@@ -23,8 +23,6 @@ parser.add_argument('--log', dest='log_file_name', help='log file name', default
 parser.add_argument('--ignore-conflict', dest='ignore_conflict', help='turn on to ignore conflicts (overlapped gene)')
 
 args = parser.parse_args()
-print(args)
-
 
 ext = os.path.splitext(args.input_file_name)[1]
 if args.output_file_name:
@@ -210,8 +208,8 @@ def read_gff_json(gff_json):
 try:
     webexe.progress(0, 'start')
     with open(args.input_file_name, 'r') as f_src, \
-        open(output_file_name, 'w') as f_dst, \
-        open(args.log_file_name,'w') as f_log:
+        open('results/' + output_file_name, 'w') as f_dst, \
+        open('results/' + args.log_file_name,'w') as f_log:
         line_count=0
         webexe.progress(0, 'loading files')
         src_json = json.load(f_src)
@@ -232,7 +230,10 @@ try:
         else:
             raise Exception('unkown file type')
     webexe.progress(100, 'finish')
-    webexe.result({'files':[{'name':'output'+ext, 'url':output_file_name, 'logUrl':args.log_file_name}]},'finish')
+    webexe.result({'files':[
+        {'name':'output'+ext, 'url':output_file_name},
+        {'name':'log.txt', 'url':args.log_file_name},
+        ]},'finish')
 except Exception as err:
     webexe.abort({}, str(err))
     print(str(err), file=sys.stderr)

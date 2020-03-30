@@ -82,5 +82,27 @@ export default {
         essential: true,
       }
     ]
+  },
+
+  replace_codons: {
+    name: 'replace_codons',
+    description: 'replace codons in CDS, by giving rules in format ABC:XYZ CBA:ZYX ...',
+    params: [
+      {
+        name: 'srcFileName',
+        control: 'file',
+        controlSettings: {
+          singleFile:true,
+          fileLimit: 1024*1024*1024,
+        },
+        essential: true,
+      },
+      {
+        name: 'rules',
+        control: 'text',
+        placeholder: 'rules',
+        essential: true,
+      },
+    ]
   }
 }

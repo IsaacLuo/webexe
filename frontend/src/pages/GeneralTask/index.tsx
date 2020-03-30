@@ -13,7 +13,7 @@ import {
 
 // other tools
 import styled from 'styled-components'
-import {Button, Progress, InputNumber, Loading} from 'element-react'
+import {Button, Progress, InputNumber, Loading, Input} from 'element-react'
 import ProgressMonitorPanel from '../../components/ProgressMonitorPanel'
 import Dropzone, {useDropzone} from 'react-dropzone'
 import Axios from 'axios';
@@ -226,6 +226,10 @@ class GeneralTask extends React.Component<IProps, IState> {
           />
       case 'file':
         return <MyDropzone onChange = {onChange}/>
+      case 'text':
+        return <Input
+          onChange={onChange}
+        />
       default:
         return <div>unsupported control</div>
     }

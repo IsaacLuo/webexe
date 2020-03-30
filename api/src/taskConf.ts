@@ -14,5 +14,9 @@ export default {
   generate_promoter_terminator: {
     program: 'python3',
     params: ['scripts/generate_promoter_terminator.py', '{srcFileName}', '{promoterLength}', '{terminatorLength}'],
+  },
+  replace_codons: {
+    program: 'python3',
+    params: ['scripts/replace_codons.py', '{srcFileName}', '{rules}'],
   }
 }
