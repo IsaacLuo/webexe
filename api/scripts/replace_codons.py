@@ -48,6 +48,11 @@ def in_order(records):
             return False
     return True
 
+def mark_features_as_modified(gff_json, start, end):
+    for record in gff_json['records']:
+        if not (record['start'] >= end or record['end'] <= start):
+            record['__modified'] = True
+
 def read_gff_json(gff_json):
 
     # can handle only one seq
@@ -85,10 +90,10 @@ def read_gff_json(gff_json):
                     if record != gene and not (record['start'] >= gene['end'] or record['end'] <= gene['start']):
                         # overlapping
                         if record['featureType'] in white_list:
-                            if 'subRecord' not in gene:
-                                gene['subRecord'] = [record]
+                            if '__subRecord' not in gene:
+                                gene['__subRecord'] = [record]
                             else:
-                                gene['subRecord'].append(record)
+                                gene['__subRecord'].append(record)
                         else:
                             overlapped_genes.append(gene)
                             break
@@ -102,10 +107,10 @@ def read_gff_json(gff_json):
         for gene in genes:
             for cds in cdses:
                 if cds['start'] >= gene['start'] and cds['end']<=gene['end']:
-                    if 'cds' not in gene:
-                        gene['cds'] = [cds]
+                    if '__cds' not in gene:
+                        gene['__cds'] = [cds]
                     else:
-                        gene['cds'].append(cds)
+                        gene['__cds'].append(cds)
         
         # replace codons
         rules = {k:v for k,v in [x.upper().split(':') for x in args.convert_rules]}
@@ -114,17 +119,17 @@ def read_gff_json(gff_json):
         progress_counter = webexe.ProgressCounter(20, 60, len_genes)
         for i, gene in enumerate(genes):
             progress_counter.count('converting cds %s/%s'%(i, len_genes))
-            if len(gene['cds']) == 0:
+            if len(gene['__cds']) == 0:
                 # no cds? trade gene as cds
                 sequence = gff_json['sequence'][gene['chrName']][gene['start']:gene['end']]
-            elif len(gene['cds']) == 1:
+            elif len(gene['__cds']) == 1:
                 # only one cds
-                cds = gene['cds'][0]
+                cds = gene['__cds'][0]
                 sequence = gff_json['sequence'][cds['chrName']][cds['start']:cds['end']]
             else:
                 # multiple cds
                 seqs = []
-                for cds in gene['cds']:
+                for cds in gene['__cds']:
                     seqs.append(gff_json['sequence'][cds['chrName']][cds['start']:cds['end']])
                 sequence = ''.join(seqs)
             if gene['strand'] < 0:
@@ -142,11 +147,11 @@ def read_gff_json(gff_json):
             if modified:
                 final_sequence = ''.join(final_sequence)
                 # gene['sequence'] = sequence
-                gene['modified'] = True
+                gene['__modified'] = True
                 if gene['strand'] < 0:
-                    gene['sequence'] = rc(final_sequence)
+                    gene['__sequence'] = rc(final_sequence)
                 else:
-                    gene['sequence'] = final_sequence
+                    gene['__sequence'] = final_sequence
 
         # write back sequence
         pointer = 0
@@ -159,30 +164,36 @@ def read_gff_json(gff_json):
                 sequence_fragements.append(whole_sequence[pointer:gene['start']])
                 pointer = gene['start']
             if pointer == gene['start']:
-                if 'modified' in gene:
-                    if 'cds' in gene and len(gene['cds']) > 1:
+                if '__modified' in gene:
+                    if '__cds' in gene and len(gene['__cds']) > 1:
                         base_pair_used = 0
-                        for cds in gene['cds']:
+                        for cds in gene['__cds']:
                             if pointer < cds['start']:
                                 sequence_fragements.append(whole_sequence[pointer : cds['start']])
                                 pointer = cds['start']
                             if pointer == cds['start']:
                                 base_pair_to_use = cds['end'] - cds['start']
-                                cds_seq = gene['sequence'][base_pair_used:base_pair_used + base_pair_to_use]
+                                cds_seq = gene['__sequence'][base_pair_used:base_pair_used + base_pair_to_use]
                                 ori_seq = whole_sequence[cds['start'] : cds['end']]
                                 if cds_seq != ori_seq:
-                                    cds['modified'] = True
+                                    cds['__modified'] = True
+                                    # mark all overlapped features as "modified"
+                                    mark_features_as_modified(gff_json, cds['start'], cds['end'])
                                 sequence_fragements.append(cds_seq)
                                 base_pair_used += base_pair_to_use
                                 pointer = cds['end']
                     else:
-                        sequence_fragements.append(gene['sequence'])
-                        if 'cds' in gene:
-                            gene['cds'][0]['modified'] = True
+                        sequence_fragements.append(gene['__sequence'])
+                        if '__cds' in gene:
+                            gene['__cds'][0]['__modified'] = True
                 else:
                     sequence_fragements.append(whole_sequence[gene['start']:gene['end']])
                 pointer = gene['end']
-        
+        else:
+            #write rest part into sequence
+            sequence_fragements.append(whole_sequence[pointer:])
+
+
         seqKey = list(gff_json['sequence'].keys())[0]
         gff_json['sequence'][seqKey] = ''.join(sequence_fragements)
 
@@ -195,13 +206,13 @@ def read_gff_json(gff_json):
         webexe.progress(85, 'cleaning')
         updatedAt = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
         for record in gff_json['records']:
-            if 'modified' in record and record['modified'] == True:
+            if '__modified' in record and record['__modified'] == True:
                 record.pop('sequenceHash', None)
                 record.pop('sequenceRef', None)
                 record.pop('original', None)
-            record.pop('sequence', None)
-            record.pop('cds', None)
-            record.pop('subRecord', None)
+            record.pop('__sequence', None)
+            record.pop('__cds', None)
+            record.pop('__subRecord', None)
             record['updatedAt'] = updatedAt
 
         return (gff_json, genes, overlapped_genes, )

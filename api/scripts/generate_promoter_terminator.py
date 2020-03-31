@@ -75,6 +75,7 @@ def read_gff_json(gff_json):
                 chrFileName = record['chrFileName'] if 'chrFileName' in record else None
                 if promoter_start <= terminator_start:
                     new_records.append({
+                        '__modified': True,
                         'seqName':record['seqName'],
                         'source':'cailab_generate_promoter_terminator',
                         'featureType': 'promoter',
@@ -96,6 +97,7 @@ def read_gff_json(gff_json):
                         })
 
                     new_records.append({
+                        '__modified': True,
                         'seqName':record['seqName'],
                         'source':'cailab_generate_promoter_terminator',
                         'featureType': 'terminator',
@@ -117,6 +119,7 @@ def read_gff_json(gff_json):
                         })
                 else:
                     new_records.append({
+                        '__modified': True,
                         'seqName':record['seqName'],
                         'source':'cailab_generate_promoter_terminator',
                         'featureType': 'terminator',
@@ -137,6 +140,7 @@ def read_gff_json(gff_json):
                         }
                         })
                     new_records.append({
+                        '__modified': True,
                         'seqName':record['seqName'],
                         'source':'cailab_generate_promoter_terminator',
                         'featureType': 'promoter',
