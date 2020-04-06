@@ -48,10 +48,11 @@ def in_order(records):
             return False
     return True
 
-def mark_features_as_modified(gff_json, start, end):
+def mark_features_as_modified(gff_json, start, end, changelog):
     for record in gff_json['records']:
         if not (record['start'] >= end or record['end'] <= start):
             record['__modified'] = True
+            record['__changelog'] = changelog
 
 def read_gff_json(gff_json):
 
@@ -178,7 +179,7 @@ def read_gff_json(gff_json):
                                 if cds_seq != ori_seq:
                                     cds['__modified'] = True
                                     # mark all overlapped features as "modified"
-                                    mark_features_as_modified(gff_json, cds['start'], cds['end'])
+                                    mark_features_as_modified(gff_json, cds['start'], cds['end'], 'codon replaced {}'.format(rules))
                                 sequence_fragements.append(cds_seq)
                                 base_pair_used += base_pair_to_use
                                 pointer = cds['end']
@@ -186,6 +187,8 @@ def read_gff_json(gff_json):
                         sequence_fragements.append(gene['__sequence'])
                         if '__cds' in gene:
                             gene['__cds'][0]['__modified'] = True
+                            gene['__cds'][0]['__changelog'] = 'codon replaced {}'.format(rules)
+                            gene['__changelog'] = 'codon replaced {}'.format(rules)
                 else:
                     sequence_fragements.append(whole_sequence[gene['start']:gene['end']])
                 pointer = gene['end']
