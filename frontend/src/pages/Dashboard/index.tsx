@@ -13,6 +13,7 @@ const DashboardPanel = styled.div`
   display: flex;
   padding: 30px;
   justify-content: center;
+  flex-wrap: wrap;
 `;
 
 const DashboardItem = styled.div`
@@ -23,11 +24,13 @@ const DashboardItem = styled.div`
   display:flex;
   flex-direction:column;
   justify-content:space-between;
+  max-width: 500px;
 `;
 
 const DashboardItemTitle = styled.div`
   font-size: 2em;
   color: #44a;
+  word-break:break-all;
 `;
 
 const RoundButton = styled(Button)`

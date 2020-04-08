@@ -161,8 +161,17 @@ async (ctx:Ctx, next:Next)=> {
     }
   }
   console.log('taskParams', taskParams);
-  
-  let processId = global.taskDict.initialTask(taskName, taskParams);
+
+  let dataIn:any = undefined;
+  if (taskConf[taskName].dataIn) {
+    const taskDataInKeys = [...taskConf[taskName].dataIn];
+    dataIn = {};
+    for (const key of taskDataInKeys) {
+      dataIn[key] = params[key];
+    }
+  }
+  let processId = global.taskDict.initialTask(taskName, taskParams, dataIn);
+
 
   ctx.body = {
     processId,
@@ -356,7 +365,7 @@ io.on('connection', async (socket)=>{
     try {
       const result = await runExe( //===================== run exe here
             task,
-            null,
+            task.dataIn,
             (outputObj) => {
               io.in(id).emit(outputObj.type, outputObj.data);
               if(outputObj.message) {

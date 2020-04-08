@@ -47,9 +47,10 @@ export function runExe (
         reject(code);
       }
     });
-
+    console.log('dataIn=', dataIn);
     if (dataIn) {
       subProcess.stdin.write(JSON.stringify(dataIn));
+      subProcess.stdin.write('\n');
     }
 
   });

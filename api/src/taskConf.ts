@@ -18,5 +18,10 @@ export default {
   replace_codons: {
     program: 'python3',
     params: ['scripts/replace_codons.py', '{srcFileName}', '{rules}'],
+  },
+  global_alignment: {
+    program: 'python3',
+    params: ['scripts/global_alignment.py'],
+    dataIn: ['sequence1', 'sequence2'],
   }
 }

@@ -104,5 +104,24 @@ export default {
         essential: true,
       },
     ]
+  },
+
+  global_alignment: {
+    name: 'global_alignment',
+    description: 'global alignment',
+    params: [
+      {
+        name: 'sequence1',
+        control: 'text',
+        placeholder: 'sequence 1',
+        essential: true,
+      },
+      {
+        name: 'sequence2',
+        control: 'text',
+        placeholder: 'sequence 2',
+        essential: true,
+      },
+    ]
   }
 }
