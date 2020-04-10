@@ -6,10 +6,8 @@ import os
 
 from Bio import pairwise2
 
-# Import format_alignment method
 from Bio.pairwise2 import format_alignment
 
-# Define two sequences to be aligned
 data = input()
 webexe.log(data)
 data = json.loads(data)
