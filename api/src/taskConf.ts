@@ -19,6 +19,11 @@ export default {
     program: 'python3',
     params: ['scripts/replace_codons.py', '{srcFileName}', '{rules}'],
   },
+  insert_parts_after_features: {
+    program: 'python3',
+    params: ['scripts/insert_parts_after_features.py', '{srcFileName}', '{featureType}', '{direct}', '{offset}', '{sequenceType}', '{sequence}'],
+  },
+
   global_alignment: {
     program: 'python3',
     params: ['scripts/global_alignment.py'],

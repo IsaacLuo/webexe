@@ -11,6 +11,8 @@ import argparse
 
 import webexe
 
+import tools
+
 # sys.argv.append( r'C:\Users\luoyi\Desktop\chr4.json')
 # sys.argv.append('TAG:TAA')
 # sys.argv.append('TGA:TAA')
@@ -34,10 +36,6 @@ else:
 
 if len(args.convert_rules) == 1 and args.convert_rules[0].find(' ')>0:
     args.convert_rules = args.convert_rules[0].split(' ')
-
-def rc(seq):
-    d = {'a':'t', 't':'a', 'c':'g', 'g':'c', 'A':'T', 'T':'A', 'C':'G', 'G':'C', 'n':'n', 'N':'N'}
-    return ''.join([d[x] for x in list(seq[::-1])])
 
 def in_order(records):
     i=0
@@ -134,7 +132,7 @@ def read_gff_json(gff_json):
                     seqs.append(gff_json['sequence'][cds['chrName']][cds['start']:cds['end']])
                 sequence = ''.join(seqs)
             if gene['strand'] < 0:
-                sequence = rc(sequence)
+                sequence = tools.rc(sequence)
             # now replace codon using rules
             final_sequence = []
             modified = False
@@ -150,7 +148,7 @@ def read_gff_json(gff_json):
                 # gene['sequence'] = sequence
                 gene['__modified'] = True
                 if gene['strand'] < 0:
-                    gene['__sequence'] = rc(final_sequence)
+                    gene['__sequence'] = tools.rc(final_sequence)
                 else:
                     gene['__sequence'] = final_sequence
 
@@ -205,6 +203,11 @@ def read_gff_json(gff_json):
             if whole_sequence[i] != gff_json['sequence'][seqKey][i]:
                 count+=1
 
+        gff_json['__changelog'] = 'codon replaced {}'.format(rules)
+        if 'changelog' not in gff_json:
+            gff_json['changelog'] = []
+        gff_json['changelog'].insert(0, gff_json['__changelog'])
+
         # clean unnecesary attributes
         webexe.progress(85, 'cleaning')
         updatedAt = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
@@ -217,6 +220,7 @@ def read_gff_json(gff_json):
             record.pop('__cds', None)
             record.pop('__subRecord', None)
             record['updatedAt'] = updatedAt
+            record['sequenceHash'] = tools.get_sequence_hash(gff_json, record['chrName'], record['start'], record['end'], record['strand'])
 
         return (gff_json, genes, overlapped_genes, )
     else:
@@ -224,6 +228,8 @@ def read_gff_json(gff_json):
 
 try:
     webexe.progress(0, 'start')
+    if not os.path.exists('results'):
+        os.makedirs('results')
     with open(args.input_file_name, 'r') as f_src, \
         open('results/' + output_file_name, 'w') as f_dst, \
         open('results/' + args.log_file_name,'w') as f_log:
@@ -243,9 +249,9 @@ try:
                 for gene in ignored_genes:
                     f_log.write('{}\t{}\t{}\n'.format(gene['name'],gene['start'],gene['end']))
             else:
-                raise Exception('unkown file type')
+                raise Exception('unknown file type')
         else:
-            raise Exception('unkown file type')
+            raise Exception('unknown file type')
     webexe.progress(100, 'finish')
     webexe.result({'files':[
         {'name':'output'+ext, 'url':output_file_name},

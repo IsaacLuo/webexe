@@ -106,6 +106,28 @@ export default {
     ]
   },
 
+  insert_parts_after_features: {
+    name: 'insert_parts_after_features',
+    description: 'insert parts after features by giving rules',
+    params: [
+      {
+        name: 'srcFileName',
+        control: 'file',
+        controlSettings: {
+          singleFile:true,
+          fileLimit: 1024*1024*1024,
+        },
+        essential: true,
+      },
+      {
+        name: 'rules',
+        control: 'text',
+        placeholder: 'rules',
+        essential: true,
+      },
+    ]
+  },
+
   global_alignment: {
     name: 'global_alignment',
     description: 'global alignment',
