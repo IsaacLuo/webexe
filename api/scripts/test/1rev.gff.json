@@ -1,0 +1,157 @@
+{
+  "fileType": "cailab_gff_json",
+  "version": "0.1",
+  "seqInfo": {
+    "test_single_gene_pro_ter_chr01 [4/21/2020, 4:49:59 PM]": { "length": 3000 }
+  },
+  "records": [
+    {
+      "_id": "5e9db027880c9e5312d14b19",
+      "featureType": "gene",
+      "chrName": "test_single_gene_pro_ter_chr01 [4/21/2020, 4:49:59 PM]",
+      "chrId": 0,
+      "start": 1000,
+      "end": 2000,
+      "strand": -1,
+      "attribute": {
+        "ID": "YAL003W_BY4741",
+        "Name": "YAL003W",
+        "orf_classification": "Verified",
+        "gene": "EFB1",
+        "Alias": "EFB1,EF-1beta,eEF1Balpha,TEF5",
+        "dbxref": "SGD:S000000003",
+        "Note": "Translation elongation factor 1 beta; stimulates nucleotide exchange to regenerate EF-1 alpha-GTP for the next elongation cycle; part of the EF-1 complex, which facilitates binding of aminoacyl-tRNA to the ribosomal A site"
+      },
+      "name": "EFB1,EF-1beta,eEF1Balpha,TEF5",
+      "original": true,
+      "history": [],
+      "sequenceHash": "a4e144d0b958cf2c285b2127bef1097e",
+      "sequenceRef": {
+        "_id": "5e9f18b33a967b7334d84624",
+        "fileName": "fd761e72-a8fe-4f27-afa6-3d88644891b8",
+        "start": 1000,
+        "end": 2000,
+        "strand": -1
+      },
+      "changelog": "imported from file \"test_single_gene_pro_ter.gff\"",
+      "createdAt": "2020-04-20T14:22:31.313Z",
+      "updatedAt": "2020-04-20T14:22:31.313Z"
+    },
+    {
+      "_id": "5e9db027880c9e5312d14b1a",
+      "featureType": "mRNA",
+      "chrName": "test_single_gene_pro_ter_chr01 [4/21/2020, 4:49:59 PM]",
+      "chrId": 0,
+      "start": 1000,
+      "end": 2000,
+      "strand": -1,
+      "attribute": {
+        "ID": "YAL003W_mRNA",
+        "Name": "YAL003W_mRNA",
+        "Parent": "YAL003W_BY4741"
+      },
+      "name": "YAL003W_mRNA",
+      "original": true,
+      "history": [],
+      "sequenceHash": "a4e144d0b958cf2c285b2127bef1097e",
+      "sequenceRef": {
+        "_id": "5e9f18b33a967b7334d84625",
+        "fileName": "fd761e72-a8fe-4f27-afa6-3d88644891b8",
+        "start": 1000,
+        "end": 2000,
+        "strand": -1
+      },
+      "changelog": "imported from file \"test_single_gene_pro_ter.gff\"",
+      "createdAt": "2020-04-20T14:22:31.313Z",
+      "updatedAt": "2020-04-20T14:22:31.313Z"
+    },
+    {
+      "_id": "5e9db027880c9e5312d14b1b",
+      "featureType": "CDS",
+      "chrName": "test_single_gene_pro_ter_chr01 [4/21/2020, 4:49:59 PM]",
+      "chrId": 0,
+      "start": 1000,
+      "end": 1300,
+      "strand": -1,
+      "attribute": {
+        "Parent": "YAL003W_mRNA",
+        "Name": "YAL003W_CDS",
+        "orf_classification": "Verified"
+      },
+      "name": "YAL003W_CDS",
+      "original": true,
+      "history": [],
+      "sequenceHash": "088c6c2ded65515970a023dd452759a8",
+      "sequenceRef": {
+        "_id": "5e9f18b33a967b7334d84626",
+        "fileName": "fd761e72-a8fe-4f27-afa6-3d88644891b8",
+        "start": 1000,
+        "end": 1300,
+        "strand": -1
+      },
+      "changelog": "imported from file \"test_single_gene_pro_ter.gff\"",
+      "createdAt": "2020-04-20T14:22:31.313Z",
+      "updatedAt": "2020-04-20T14:22:31.313Z"
+    },
+    {
+      "_id": "5e9db027880c9e5312d14b1d",
+      "featureType": "intron",
+      "chrName": "test_single_gene_pro_ter_chr01 [4/21/2020, 4:49:59 PM]",
+      "chrId": 0,
+      "start": 1300,
+      "end": 1400,
+      "strand": -1,
+      "attribute": {
+        "Parent": "YAL003W_mRNA",
+        "Name": "YAL003W_intron",
+        "orf_classification": "Verified"
+      },
+      "name": "YAL003W_intron",
+      "original": true,
+      "history": [],
+      "sequenceHash": "7dac25120491180bce99c4ad39e4eea3",
+      "sequenceRef": {
+        "_id": "5e9f18b33a967b7334d84628",
+        "fileName": "fd761e72-a8fe-4f27-afa6-3d88644891b8",
+        "start": 1300,
+        "end": 1400,
+        "strand": -1
+      },
+      "changelog": "imported from file \"test_single_gene_pro_ter.gff\"",
+      "createdAt": "2020-04-20T14:22:31.313Z",
+      "updatedAt": "2020-04-20T14:22:31.313Z"
+    },
+    {
+      "_id": "5e9db027880c9e5312d14b1c",
+      "featureType": "CDS",
+      "chrName": "test_single_gene_pro_ter_chr01 [4/21/2020, 4:49:59 PM]",
+      "chrId": 0,
+      "start": 1400,
+      "end": 2000,
+      "strand": -1,
+      "attribute": {
+        "Parent": "YAL003W_mRNA",
+        "Name": "YAL003W_CDS",
+        "orf_classification": "Verified"
+      },
+      "name": "YAL003W_CDS",
+      "original": true,
+      "history": [],
+      "sequenceHash": "40062f314ea515a05200d153159cd5e6",
+      "sequenceRef": {
+        "_id": "5e9f18b33a967b7334d84627",
+        "fileName": "fd761e72-a8fe-4f27-afa6-3d88644891b8",
+        "start": 1400,
+        "end": 2000,
+        "strand": -1
+      },
+      "changelog": "imported from file \"test_single_gene_pro_ter.gff\"",
+      "createdAt": "2020-04-20T14:22:31.313Z",
+      "updatedAt": "2020-04-20T14:22:31.313Z"
+    }
+  ],
+  "sequence": {
+    "test_single_gene_pro_ter_chr01 [4/21/2020, 4:49:59 PM]": "TATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTATTCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGCATTATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTAT"
+  },
+  "history": []
+}
