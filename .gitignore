@@ -12,3 +12,8 @@
 /frontend/src/conf.json
 /.env
 /api/.env
+api/scripts/results/log.log
+*.pyc
+frontend/.vscode/tasks.json
+webexe.code-workspace
+api/scripts/results/target.json
