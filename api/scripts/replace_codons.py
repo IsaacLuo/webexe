@@ -236,20 +236,17 @@ try:
         line_count=0
         webexe.progress(0, 'loading files')
         src_json = json.load(f_src)
-        if 'fileType' in src_json:
-            if src_json['fileType'] == 'cailab_gff_json':
-                new_json, modified_genes, ignored_genes = read_gff_json(src_json)
-                webexe.progress(90, 'dumping')
-                json.dump(new_json, f_dst)
-                webexe.progress(95, 'generating report')
-                f_log.write('modified genes\n')
-                for gene in modified_genes:
-                    f_log.write('{}\t{}\t{}\n'.format(gene['name'],gene['start'],gene['end']))
-                f_log.write('\n\nignored genes\n')
-                for gene in ignored_genes:
-                    f_log.write('{}\t{}\t{}\n'.format(gene['name'],gene['start'],gene['end']))
-            else:
-                raise Exception('unknown file type')
+        if 'mimetype' in src_json and src_json['mimetype'] == 'application/gffjson':
+            new_json, modified_genes, ignored_genes = read_gff_json(src_json)
+            webexe.progress(90, 'dumping')
+            json.dump(new_json, f_dst)
+            webexe.progress(95, 'generating report')
+            f_log.write('modified genes\n')
+            for gene in modified_genes:
+                f_log.write('{}\t{}\t{}\n'.format(gene['name'],gene['start'],gene['end']))
+            f_log.write('\n\nignored genes\n')
+            for gene in ignored_genes:
+                f_log.write('{}\t{}\t{}\n'.format(gene['name'],gene['start'],gene['end']))
         else:
             raise Exception('unknown file type')
     webexe.progress(100, 'finish')

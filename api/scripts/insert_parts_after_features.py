@@ -197,20 +197,17 @@ try:
         line_count=0
         webexe.progress(0, 'loading files')
         src_json = json.load(f_src)
-        if 'fileType' in src_json:
-            if src_json['fileType'] == 'cailab_gff_json':
-                new_json, insert_poses, ignored_genes = read_gff_json(src_json)
-                webexe.progress(90, 'dumping')
-                json.dump(new_json, f_dst)
-                webexe.progress(95, 'generating report')
-                f_log.write('\n\ninserted pos\n')
-                for pos in insert_poses:
-                    f_log.write('{}\n'.format(pos[0]))
-                f_log.write('\n\noverlapping features\n')
-                for gene in ignored_genes:
-                    f_log.write('{}\t{}\t{}\n'.format(gene[1]['name'],gene[1]['start'],gene[1]['end']))
-            else:
-                raise Exception('unknown file type')
+        if 'mimetype' in src_json and src_json['mimetype'] == 'application/gffjson':
+            new_json, insert_poses, ignored_genes = read_gff_json(src_json)
+            webexe.progress(90, 'dumping')
+            json.dump(new_json, f_dst)
+            webexe.progress(95, 'generating report')
+            f_log.write('\n\ninserted pos\n')
+            for pos in insert_poses:
+                f_log.write('{}\n'.format(pos[0]))
+            f_log.write('\n\noverlapping features\n')
+            for gene in ignored_genes:
+                f_log.write('{}\t{}\t{}\n'.format(gene[1]['name'],gene[1]['start'],gene[1]['end']))
         else:
             raise Exception('unknown file type')
     webexe.progress(100, 'finish')

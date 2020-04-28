@@ -180,7 +180,7 @@ def read_gff_json(gff_json):
         if j < new_record_len:
             result += new_records[j:]
         result_json = {
-            'fileType': 'cailab_gff_json',
+            'mimetype': 'application/gffjson-head',
             "version": "0.1",
             'records':result,
             }
@@ -212,13 +212,10 @@ try:
     with open(filename, 'r') as f_src, open('results/' + output_filename,'w') as f_dst:
         line_count=0
         src_json = json.load(f_src)
-        if 'fileType' in src_json:
-            if src_json['fileType'] == 'cailab_gff_json':
-                new_json = read_gff_json(src_json)
-                webexe.progress(80, 'dumping')
-                json.dump(new_json, f_dst)
-            else:
-                raise Exception('unknown file type')
+        if 'mimetype' in src_json and src_json['mimetype'] == 'application/gffjson':
+            new_json = read_gff_json(src_json)
+            webexe.progress(80, 'dumping')
+            json.dump(new_json, f_dst)
         else:
             raise Exception('unknown file type')
     webexe.progress(100, 'finish')
