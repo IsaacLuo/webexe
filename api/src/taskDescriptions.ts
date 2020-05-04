@@ -128,6 +128,28 @@ export default {
     ]
   },
 
+  remove_introns: {
+    name: 'remove_introns',
+    description: 'remove all introns in project',
+    params: [
+      {
+        name: 'srcFileName',
+        control: 'file',
+        controlSettings: {
+          singleFile:true,
+          fileLimit: 1024*1024*1024,
+        },
+        essential: true,
+      },
+      {
+        name: 'intronTypes',
+        control: 'text',
+        placeholder: 'intronTypes',
+        essential: false,
+      },
+    ]
+  },
+
   global_alignment: {
     name: 'global_alignment',
     description: 'global alignment',
@@ -145,5 +167,6 @@ export default {
         essential: true,
       },
     ]
-  }
+  },
+
 }

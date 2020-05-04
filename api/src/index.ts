@@ -150,7 +150,14 @@ async (ctx:Ctx, next:Next)=> {
   }
   const {params} = ctx.request.body;
   console.log('taskparams= ', params);
-  const taskParams = [...taskConf[taskName].params];
+  let taskParams = [...taskConf[taskName].params];
+
+  for(const optParamsKey in taskConf[taskName].optParams) {
+    if (params[optParamsKey]) {
+      taskParams = taskParams.concat(taskConf[taskName].optParams[optParamsKey]);
+    }
+  }
+
   for(const i in taskParams) {
     const p = taskParams[i];
     if(p[0] === '{' && p[p.length-1] === '}') {

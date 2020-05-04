@@ -23,7 +23,13 @@ export default {
     program: 'python3',
     params: ['scripts/insert_parts_after_features.py', '{srcFileName}', '{featureType}', '{direct}', '{offset}', '{sequenceType}', '{sequence}'],
   },
-
+  remove_introns: {
+    program: 'python3',
+    params: ['scripts/remove_introns.py', '{srcFileName}'],
+    optParams: {
+      intronTypes: ['--intron-types', '{intronTypes}'],
+    }
+  },
   global_alignment: {
     program: 'python3',
     params: ['scripts/global_alignment.py'],
