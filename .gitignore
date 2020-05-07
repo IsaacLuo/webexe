@@ -17,3 +17,5 @@ api/scripts/results/log.log
 frontend/.vscode/tasks.json
 webexe.code-workspace
 api/scripts/results/target.json
+/_gsdata_
+.vscode

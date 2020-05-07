@@ -180,8 +180,10 @@ def read_gff_json(gff_json):
 
         gff_json['__changelog'] = 'inserted sequence after {}'.format(args.feature_type)
         if 'changelog' not in gff_json:
-            gff_json['changelog'] = []
-        gff_json['changelog'].insert(0, gff_json['__changelog'])
+            gff_json['changelog'] = [gff_json['__changelog']]
+        else:
+            gff_json['changelog'] = [gff_json['__changelog']] + gff_json['changelog']
+
         gff_json['records'] += new_features
         gff_json['records'].sort(key=lambda x:x['start'])
 

@@ -112,11 +112,11 @@ def read_gff_json(gff_json):
         
         gff_json['records'] = new_records
 
-        record['__changelog'] = 'removed intron'
+        gff_json['__changelog'] = 'removed intron'
         if 'changelog' not in gff_json:
-            gff_json['changelog'] = [record['__changelog']]
+            gff_json['changelog'] = [gff_json['__changelog']]
         else:
-            gff_json['changelog'] = [record['__changelog']] + gff_json['changelog']
+            gff_json['changelog'] = [gff_json['__changelog']] + gff_json['changelog']
         
         
         return (gff_json, introns, )
