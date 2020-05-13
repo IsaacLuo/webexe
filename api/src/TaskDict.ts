@@ -15,7 +15,7 @@ class TaskDict {
     // });
   }
 
-  public initialTask(taskName:string, taskParams:any, taskDataIn?:any) {
+  public initialTask(taskName:string, taskParams:any, comments:any, taskDataIn?:any, ) {
     let processId;
     do {
       processId = uuid.v4();
@@ -26,6 +26,7 @@ class TaskDict {
       program: taskConf[taskName].program,
       params: taskParams,
       dataIn: taskDataIn,
+      comments,
       taskName,
       state: 'ready',
       result: undefined,

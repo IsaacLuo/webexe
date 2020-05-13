@@ -37,6 +37,7 @@ declare interface IProcess {
   subProcessInst?: any;
   program: string;
   params: string[];
+  comments: any;
   dataIn: any;
   taskName: string;
   state: 'ready'| 'running' | 'done' | 'error' | 'aborted';

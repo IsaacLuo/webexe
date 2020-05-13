@@ -57,6 +57,15 @@ def read_gff_json(gff_json):
                     terminator_start = 0
                 if terminator_end < 0:
                     terminator_end = 0
+                sequence_length = gff_json['seqInfo'][record['chrName']]['length']
+                if promoter_start > sequence_length:
+                    promoter_start = sequence_length
+                if promoter_end > sequence_length:
+                    promoter_end = sequence_length
+                if terminator_start > sequence_length:
+                    terminator_start = sequence_length
+                if terminator_end > sequence_length:
+                    terminator_end = sequence_length
                 if 'seqInfo' in gff_json and record['chrName'] in gff_json['seqInfo'] and 'length' in gff_json['seqInfo'][record['chrName']]:
                     max_length = gff_json['seqInfo'][record['chrName']]['length']
                     if promoter_start > max_length:
@@ -74,92 +83,95 @@ def read_gff_json(gff_json):
                 chrId = record['chrId'] if 'chrId' in record else 0
                 chrName = record['chrName'] if 'chrName' in record else ''
                 if promoter_start <= terminator_start:
-                    new_records.append({
-                        '__modified': True,
-                        '__changelog': 'created promoter in {} bp'.format(promoter_length),
-                        'source':'cailab_generate_promoter_terminator',
-                        'featureType': 'promoter',
-                        'start': promoter_start,
-                        'end': promoter_end,
-                        'strand': record['strand'],
-                        'attribute': {
-                            'ID': gene_id+'_promoter',
-                            'Name': gene_name+'_promoter',
-                        },
-                        'name': name + '_P',
-                        'chrId': chrId,
-                        'chrName': chrName,
-                        'tags': {
-                            'createdAt': datetime.datetime.now().isoformat(),
-                            'createdBy': 'cailab-webexe'
-                        },
-                        'sequenceHash': tools.get_sequence_hash(gff_json, chrName, promoter_start, promoter_end, record['strand']) if 'sequence' in gff_json else None,
-                        })
-
-                    new_records.append({
-                        '__modified': True,
-                        '__changelog': 'created terminator in {} bp'.format(terminator_length),
-                        'source':'cailab_generate_promoter_terminator',
-                        'featureType': 'terminator',
-                        'start': terminator_start,
-                        'end': terminator_end,
-                        'strand': record['strand'],
-                        'attribute': {
-                            'ID': gene_id+'_terminator',
-                            'Name': gene_name+'_terminator',
-                        },
-                        'name': name + '_T',
-                        'chrId': chrId,
-                        'chrName': chrName,
-                        'tags': {
-                            'createdAt': datetime.datetime.now().isoformat(),
-                            'createdBy': 'cailab-webexe'
-                        },
-                        'sequenceHash': tools.get_sequence_hash(gff_json, chrName, terminator_start, terminator_end, record['strand']) if 'sequence' in gff_json else None,
-                        })
+                    if promoter_end > promoter_start:
+                        new_records.append({
+                            '__modified': True,
+                            '__changelog': 'created promoter in {} bp'.format(promoter_length),
+                            'source':'cailab_generate_promoter_terminator',
+                            'featureType': 'promoter',
+                            'start': promoter_start,
+                            'end': promoter_end,
+                            'strand': record['strand'],
+                            'attribute': {
+                                'ID': gene_id+'_promoter',
+                                'Name': gene_name+'_promoter',
+                            },
+                            'name': name + '_P',
+                            'chrId': chrId,
+                            'chrName': chrName,
+                            'tags': {
+                                'createdAt': datetime.datetime.now().isoformat(),
+                                'createdBy': 'cailab-webexe'
+                            },
+                            'sequenceHash': tools.get_sequence_hash(gff_json, chrName, promoter_start, promoter_end, record['strand']) if 'sequence' in gff_json else None,
+                            })
+                    if terminator_end > terminator_start:
+                        new_records.append({
+                            '__modified': True,
+                            '__changelog': 'created terminator in {} bp'.format(terminator_length),
+                            'source':'cailab_generate_promoter_terminator',
+                            'featureType': 'terminator',
+                            'start': terminator_start,
+                            'end': terminator_end,
+                            'strand': record['strand'],
+                            'attribute': {
+                                'ID': gene_id+'_terminator',
+                                'Name': gene_name+'_terminator',
+                            },
+                            'name': name + '_T',
+                            'chrId': chrId,
+                            'chrName': chrName,
+                            'tags': {
+                                'createdAt': datetime.datetime.now().isoformat(),
+                                'createdBy': 'cailab-webexe'
+                            },
+                            'sequenceHash': tools.get_sequence_hash(gff_json, chrName, terminator_start, terminator_end, record['strand']) if 'sequence' in gff_json else None,
+                            })
                 else:
-                    new_records.append({
-                        '__modified': True,
-                        '__changelog': 'created terminator in {} bp'.format(terminator_length),
-                        'source':'cailab_generate_promoter_terminator',
-                        'featureType': 'terminator',
-                        'start': terminator_start,
-                        'end': terminator_end,
-                        'strand': record['strand'],
-                        'attribute': {
-                            'ID': gene_id+'_terminator',
-                            'Name': gene_name+'_terminator',
-                        },
-                        'name': name + '_T',
-                        'chrId': chrId,
-                        'chrName': chrName,
-                        'tags': {
-                            'createdAt': datetime.datetime.now().isoformat(),
-                            'createdBy': 'cailab-webexe'
-                        },
-                        'sequenceHash': tools.get_sequence_hash(gff_json, chrName, terminator_start, terminator_end, record['strand']) if 'sequence' in gff_json else None,
-                        })
-                    new_records.append({
-                        '__modified': True,
-                        '__changelog': 'created promoter in {} bp'.format(promoter_length),
-                        'source':'cailab_generate_promoter_terminator',
-                        'featureType': 'promoter',
-                        'start': promoter_start,
-                        'end': promoter_end,
-                        'strand': record['strand'],
-                        'attribute': {
-                            'ID': gene_id+'_promoter',
-                            'Name': gene_name+'_promoter',
-                        },
-                        'name': name + '_P',
-                        'chrId': chrId,
-                        'chrName': chrName,
-                        'tags': {
-                            'createdAt': datetime.datetime.now().isoformat(),
-                            'createdBy': 'cailab-webexe'
-                        },
-                        'sequenceHash': tools.get_sequence_hash(gff_json, chrName, promoter_start, promoter_end, record['strand']) if 'sequence' in gff_json else None,
-                        })
+                    if terminator_end > terminator_start:
+                        new_records.append({
+                            '__modified': True,
+                            '__changelog': 'created terminator in {} bp'.format(terminator_length),
+                            'source':'cailab_generate_promoter_terminator',
+                            'featureType': 'terminator',
+                            'start': terminator_start,
+                            'end': terminator_end,
+                            'strand': record['strand'],
+                            'attribute': {
+                                'ID': gene_id+'_terminator',
+                                'Name': gene_name+'_terminator',
+                            },
+                            'name': name + '_T',
+                            'chrId': chrId,
+                            'chrName': chrName,
+                            'tags': {
+                                'createdAt': datetime.datetime.now().isoformat(),
+                                'createdBy': 'cailab-webexe'
+                            },
+                            'sequenceHash': tools.get_sequence_hash(gff_json, chrName, terminator_start, terminator_end, record['strand']) if 'sequence' in gff_json else None,
+                            })
+                    if promoter_end > promoter_start:
+                        new_records.append({
+                            '__modified': True,
+                            '__changelog': 'created promoter in {} bp'.format(promoter_length),
+                            'source':'cailab_generate_promoter_terminator',
+                            'featureType': 'promoter',
+                            'start': promoter_start,
+                            'end': promoter_end,
+                            'strand': record['strand'],
+                            'attribute': {
+                                'ID': gene_id+'_promoter',
+                                'Name': gene_name+'_promoter',
+                            },
+                            'name': name + '_P',
+                            'chrId': chrId,
+                            'chrName': chrName,
+                            'tags': {
+                                'createdAt': datetime.datetime.now().isoformat(),
+                                'createdBy': 'cailab-webexe'
+                            },
+                            'sequenceHash': tools.get_sequence_hash(gff_json, chrName, promoter_start, promoter_end, record['strand']) if 'sequence' in gff_json else None,
+                            })
         
         webexe.progress(40, 'merging')
         #merge sort

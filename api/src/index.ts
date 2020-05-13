@@ -148,7 +148,7 @@ async (ctx:Ctx, next:Next)=> {
   if (!taskDescriptions[taskName]) {
     ctx.throw(404, 'no this task');
   }
-  const {params} = ctx.request.body;
+  const {params, comments} = ctx.request.body;
   console.log('taskparams= ', params);
   let taskParams = [...taskConf[taskName].params];
 
@@ -178,8 +178,7 @@ async (ctx:Ctx, next:Next)=> {
       dataIn[key] = params[key];
     }
   }
-  let processId = global.taskDict.initialTask(taskName, taskParams, dataIn);
-
+  let processId = global.taskDict.initialTask(taskName, taskParams, comments, dataIn);
 
   ctx.body = {
     processId,
