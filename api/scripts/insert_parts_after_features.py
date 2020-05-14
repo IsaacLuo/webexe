@@ -29,7 +29,7 @@ parser.add_argument(dest='offset', help="how many byte offset after/before the f
 parser.add_argument(dest='sequence_type', help='sequence type to insert')
 parser.add_argument(dest='sequence', help="sequence to insert")
 parser.add_argument('--output', dest='output_file_name', help='output filename in gff.json format')
-parser.add_argument('--log', dest='log_file_name', help='log file name', default=webexe.random_string() + '.log')
+parser.add_argument('--log', dest='log_file_name', help='log file name', default=webexe.random_file_name(ext='.log'))
 parser.add_argument('--ignore-conflict', dest='ignore_conflict', help='turn on to ignore conflicts (overlapped gene)')
 
 args = parser.parse_args()
@@ -38,7 +38,7 @@ ext = os.path.splitext(args.input_file_name)[1]
 if args.output_file_name:
     output_file_name = args.output_file_name
 else:
-    output_file_name = webexe.random_string() + ext
+    output_file_name = webexe.random_file_name(ext=ext)
 
 webexe.log('start task: insert_parts_after_features {} {} {} {} {}'.format(args.input_file_name, args.feature_type, args.direct, args.offset, args.sequence))
 

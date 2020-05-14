@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser(description='replace codons from one to another
 parser.add_argument(dest='input_file_name', help='input filename in gff.json format')
 parser.add_argument('--intron-types', dest='intron_types', help="feature types of introns", nargs='+')
 parser.add_argument('--output', dest='output_file_name', help='input filename in gff.json format')
-parser.add_argument('--log', dest='log_file_name', help='log file name', default=webexe.random_string() + '.log')
+parser.add_argument('--log', dest='log_file_name', help='log file name', default=webexe.random_file_name(ext='.log'))
 parser.add_argument('--ignore-conflict', dest='ignore_conflict', help='turn on to ignore conflicts (overlapped gene)')
 
 args = parser.parse_args()
@@ -27,7 +27,7 @@ ext = os.path.splitext(args.input_file_name)[1]
 if args.output_file_name:
     output_file_name = args.output_file_name
 else:
-    output_file_name = webexe.random_string() + ext
+    output_file_name = webexe.random_file_name(ext=ext)
 
 # in case the array parameter parsed as one string
 if not args.intron_types or len(args.intron_types) == 0:

@@ -2,6 +2,7 @@ import sys
 import json
 import random
 import string
+import datetime
 
 # message types to stdout
 # log, any string message to tell client
@@ -27,6 +28,14 @@ def abort(data, message=''):
 def random_string(stringLength=10):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
+
+def random_file_name(**kwargs):
+    file_name = '{}_{}'.format(datetime.datetime.now().strftime('%Y_%m_%d_%H_%M_%S'), random_string(5))
+    if 'ext' in kwargs:
+        if kwargs['ext'][0] == '.':
+            return file_name + kwargs['ext']
+        else:
+            return file_name + ('.' + kwargs['ext'])
 
 class ProgressCounter:
     def __init__(self, min_val, max_val, total, step=1):

@@ -244,12 +244,13 @@ async (ctx:Ctx, next:Next)=> {
   const {file} = ctx.request.files;
   const reader = fs.createReadStream(file.path);
   const now = new Date();
-  const todayStr = `${now.getFullYear()}_${now.getMonth()}_${now.getDate()}`
-  const exists = await fs_exists(`${conf.attachmentPath}/${todayStr}`);
-  const filePath = `${conf.attachmentPath}/${todayStr}/${Math.random().toString(36).substring(2)}_${file.name}`;
+  const todayStr = `${now.getFullYear()}_${now.getMonth()}_${now.getDate()}_${now.getHours()}_${now.getMinutes()}_${now.getSeconds()}`
+  const exists = await fs_exists(`${conf.attachmentPath}`);
   if (!exists) {
-    await fsPromises.mkdir(`${conf.attachmentPath}/${todayStr}`, { recursive: true })
+    await fsPromises.mkdir(`${conf.attachmentPath}`, { recursive: true })
   }
+  const filePath = `${conf.attachmentPath}/${todayStr}_${Math.random().toString(36).substring(2)}_${file.name}`;
+  
   const upStream = fs.createWriteStream(filePath);
   reader.pipe(upStream);
   ctx.body = {filePath,};
