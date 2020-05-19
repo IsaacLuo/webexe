@@ -169,4 +169,20 @@ export default {
     ]
   },
 
+  gffjson_to_genbank: {
+    name: 'gffjson_to_genbank',
+    description: 'convert gffjson to genbank',
+    params: [
+      {
+        name: 'srcFileName',
+        control: 'file',
+        controlSettings: {
+          singleFile:true,
+          fileLimit: 1024*1024*1024,
+        },
+        essential: true,
+      },
+    ]
+  }
+
 }

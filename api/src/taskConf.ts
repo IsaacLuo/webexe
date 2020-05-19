@@ -34,5 +34,10 @@ export default {
     program: 'python3',
     params: ['scripts/global_alignment.py'],
     dataIn: ['sequence1', 'sequence2'],
+  },
+
+  gffjson_to_genbank: {
+    program: 'python3',
+    params: ['scripts/gffjson_to_genbank.py', '{srcFileName}'],
   }
 }
